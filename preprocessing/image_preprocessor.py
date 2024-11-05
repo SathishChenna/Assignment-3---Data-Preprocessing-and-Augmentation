@@ -6,6 +6,7 @@ import io
 class ImagePreprocessor:
     def __init__(self):
         self.operations = {
+            "apply_all": self.apply_all_preprocessing,
             "grayscale": self.to_grayscale,
             "resize": self.resize_image,
             "normalize": self.normalize,
@@ -14,18 +15,24 @@ class ImagePreprocessor:
         }
     
     def get_available_operations(self):
-        return list(self.operations.keys())
+        return list(op for op in self.operations.keys() if op != "apply_all")
     
     def apply_operation(self, operation: str, image: np.ndarray) -> np.ndarray:
         if operation in self.operations:
             return self.operations[operation](image)
         return image
 
+    def apply_all_preprocessing(self, image: np.ndarray) -> np.ndarray:
+        processed_image = image.copy()
+        for op_name, op_func in self.operations.items():
+            if op_name != "apply_all":
+                processed_image = op_func(processed_image)
+        return processed_image
+
     def to_grayscale(self, image: np.ndarray) -> np.ndarray:
         return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     
     def resize_image(self, image: np.ndarray) -> np.ndarray:
-        # Resize to a fixed size (e.g., 224x224)
         return cv2.resize(image, (224, 224))
     
     def normalize(self, image: np.ndarray) -> np.ndarray:
@@ -40,6 +47,5 @@ class ImagePreprocessor:
 
     @staticmethod
     def array_to_bytes(image: np.ndarray) -> bytes:
-        # Convert numpy array to bytes for sending to frontend
         success, encoded_image = cv2.imencode('.png', image)
-        return encoded_image.tobytes() 
+        return encoded_image.tobytes()

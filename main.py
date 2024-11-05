@@ -8,9 +8,14 @@ from preprocessing.text_preprocessor import TextPreprocessor
 from augmentation.text_augmentor import TextAugmentor
 from preprocessing.image_preprocessor import ImagePreprocessor
 from augmentation.image_augmentor import ImageAugmentor
+from preprocessing.audio_preprocessor import AudioPreprocessor
+from augmentation.audio_augmentor import AudioAugmentor
 import cv2
 import numpy as np
 import base64
+import librosa
+import soundfile as sf
+import io
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG)
@@ -22,13 +27,13 @@ app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
-# Initialize preprocessor and augmentor
+# Initialize all processors
 preprocessor = TextPreprocessor()
 augmentor = TextAugmentor()
-
-# Initialize image processors
 image_preprocessor = ImagePreprocessor()
 image_augmentor = ImageAugmentor()
+audio_preprocessor = AudioPreprocessor()
+audio_augmentor = AudioAugmentor()
 
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
@@ -39,7 +44,9 @@ async def read_root(request: Request):
             "preprocess_options": preprocessor.get_available_operations(),
             "augmentation_options": augmentor.get_available_operations(),
             "image_preprocess_options": image_preprocessor.get_available_operations(),
-            "image_augmentation_options": image_augmentor.get_available_operations()
+            "image_augmentation_options": image_augmentor.get_available_operations(),
+            "audio_preprocess_options": audio_preprocessor.get_available_operations(),
+            "audio_augmentation_options": audio_augmentor.get_available_operations()
         }
     )
 
@@ -136,6 +143,70 @@ async def process_image(
 
     except Exception as e:
         logger.error(f"Error processing image: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/process_audio")
+async def process_audio(
+    request: Request,
+    file: UploadFile = File(...),
+    preprocess_ops: list[str] = Form(default=[]),
+    augment_ops: list[str] = Form(default=[])
+):
+    try:
+        # Read audio file
+        contents = await file.read()
+        audio_bytes = io.BytesIO(contents)
+        
+        # Load audio using librosa
+        audio_data, sr = librosa.load(audio_bytes)
+
+        # Generate original visualizations
+        original_waveform = audio_preprocessor.generate_waveform(audio_data, sr)
+        original_spectrogram = audio_preprocessor.generate_spectrogram(audio_data, sr)
+
+        # Apply preprocessing
+        preprocess_results = {}
+        preprocess_waveforms = {}
+        preprocess_spectrograms = {}
+        for op in preprocess_ops:
+            processed_audio, processed_sr, waveform, spectrogram = audio_preprocessor.apply_operation(op, audio_data.copy(), sr)
+            buffer = io.BytesIO()
+            sf.write(buffer, processed_audio, processed_sr, format='WAV')
+            preprocess_results[op] = base64.b64encode(buffer.getvalue()).decode('utf-8')
+            preprocess_waveforms[op] = waveform
+            preprocess_spectrograms[op] = spectrogram
+
+        # Apply augmentation
+        augmented_results = {}
+        augment_waveforms = {}
+        augment_spectrograms = {}
+        for op in augment_ops:
+            augmented_audio, augmented_sr, waveform, spectrogram = audio_augmentor.apply_operation(op, audio_data.copy(), sr)
+            buffer = io.BytesIO()
+            sf.write(buffer, augmented_audio, augmented_sr, format='WAV')
+            augmented_results[op] = base64.b64encode(buffer.getvalue()).decode('utf-8')
+            augment_waveforms[op] = waveform
+            augment_spectrograms[op] = spectrogram
+
+        # Convert original audio to base64
+        original_buffer = io.BytesIO()
+        sf.write(original_buffer, audio_data, sr, format='WAV')
+        original_base64 = base64.b64encode(original_buffer.getvalue()).decode('utf-8')
+
+        return JSONResponse(content={
+            "original_audio": original_base64,
+            "original_waveform": original_waveform,
+            "original_spectrogram": original_spectrogram,
+            "preprocessed_results": preprocess_results,
+            "preprocessed_waveforms": preprocess_waveforms,
+            "preprocessed_spectrograms": preprocess_spectrograms,
+            "augmented_results": augmented_results,
+            "augmented_waveforms": augment_waveforms,
+            "augmented_spectrograms": augment_spectrograms
+        })
+
+    except Exception as e:
+        logger.error(f"Error processing audio: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":

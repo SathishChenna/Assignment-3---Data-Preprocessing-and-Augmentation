@@ -6,6 +6,7 @@ import random
 class ImageAugmentor:
     def __init__(self):
         self.operations = {
+            "apply_all": self.apply_all_augmentations,
             "rotate": self.rotate_image,
             "flip": self.flip_image,
             "brightness": self.adjust_brightness,
@@ -14,64 +15,52 @@ class ImageAugmentor:
         }
     
     def get_available_operations(self):
-        return list(self.operations.keys())
+        return list(op for op in self.operations.keys() if op != "apply_all")
     
     def apply_operation(self, operation: str, image: np.ndarray) -> np.ndarray:
         if operation in self.operations:
             return self.operations[operation](image)
         return image
 
+    def apply_all_augmentations(self, image: np.ndarray) -> np.ndarray:
+        augmented_image = image.copy()
+        # Apply all operations except 'apply_all'
+        for op_name, op_func in self.operations.items():
+            if op_name != "apply_all":
+                augmented_image = op_func(augmented_image)
+        return augmented_image
+
     def rotate_image(self, image: np.ndarray) -> np.ndarray:
-        # Get the image dimensions
         height, width = image.shape[:2]
-        
-        # Calculate the center of the image
         center = (width // 2, height // 2)
-        
-        # Generate a random angle between -30 and 30 degrees
         angle = random.uniform(-30, 30)
-        
-        # Calculate the rotation matrix
         rotation_matrix = cv2.getRotationMatrix2D(center, angle, 1.0)
         
-        # Calculate new image dimensions to avoid cropping
         cos = np.abs(rotation_matrix[0, 0])
         sin = np.abs(rotation_matrix[0, 1])
         
         new_width = int((height * sin) + (width * cos))
         new_height = int((height * cos) + (width * sin))
         
-        # Adjust the rotation matrix
         rotation_matrix[0, 2] += (new_width / 2) - center[0]
         rotation_matrix[1, 2] += (new_height / 2) - center[1]
         
-        # Perform the rotation and return the image
         rotated_image = cv2.warpAffine(
             image, 
             rotation_matrix, 
             (new_width, new_height),
             flags=cv2.INTER_LINEAR,
             borderMode=cv2.BORDER_CONSTANT,
-            borderValue=(255, 255, 255)  # White background
+            borderValue=(255, 255, 255)
         )
         
         return rotated_image
     
     def flip_image(self, image: np.ndarray) -> np.ndarray:
-        # Randomly choose flip direction:
-        # 0: vertical flip
-        # 1: horizontal flip
-        # -1: both horizontal and vertical flip
         flip_directions = [0, 1, -1]
         flip_type = random.choice(flip_directions)
-        
-        # Create a copy of the image to avoid modifying the original
         flipped_image = image.copy()
-        
-        # Apply the flip
-        flipped_image = cv2.flip(flipped_image, flip_type)
-        
-        return flipped_image
+        return cv2.flip(flipped_image, flip_type)
     
     def adjust_brightness(self, image: np.ndarray) -> np.ndarray:
         brightness = random.uniform(0.5, 1.5)

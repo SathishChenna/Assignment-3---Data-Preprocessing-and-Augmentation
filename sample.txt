@@ -1,0 +1,4 @@
+Make a FastAPI bases application that allows you to load a text file and then:
+1. Display the content of the text file
+2. Perform different preprocess on the data (list all preprocesses that can be done as checkboxes that can be selected) and show how data looks after preprocess is done dynamically based on different preprocess techniques applied on it
+3. Apply different augmentation techniques on the data (again in checkboxes fashion, where user can select) and show how it looks after the augmentation

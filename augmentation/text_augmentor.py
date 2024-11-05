@@ -11,6 +11,7 @@ nltk.download('averaged_perceptron_tagger')
 class TextAugmentor:
     def __init__(self):
         self.operations = {
+            "apply_all": self.apply_all_augmentations,
             "synonym_replacement": self.synonym_replacement,
             "random_swap": self.random_swap,
             "spelling_error": self.spelling_error,
@@ -23,12 +24,19 @@ class TextAugmentor:
         self.spelling_aug = nac.KeyboardAug()
     
     def get_available_operations(self):
-        return list(self.operations.keys())
+        return list(op for op in self.operations.keys() if op != "apply_all")
     
     def apply_operation(self, operation: str, text: str) -> str:
         if operation in self.operations:
             return self.operations[operation](text)
         return text
+
+    def apply_all_augmentations(self, text: str) -> str:
+        augmented_text = text
+        for op_name, op_func in self.operations.items():
+            if op_name != "apply_all":
+                augmented_text = op_func(augmented_text)
+        return augmented_text
     
     def synonym_replacement(self, text: str) -> str:
         try:
@@ -56,4 +64,4 @@ class TextAugmentor:
         try:
             return self.spelling_aug.augment(text)[0]
         except:
-            return text 
+            return text

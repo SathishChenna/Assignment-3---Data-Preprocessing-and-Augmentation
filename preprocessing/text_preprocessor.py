@@ -16,6 +16,7 @@ except Exception as e:
 class TextPreprocessor:
     def __init__(self):
         self.operations = {
+            "apply_all": self.apply_all_preprocessing,
             "lowercase": self.to_lowercase,
             "remove_punctuation": self.remove_punctuation,
             "remove_numbers": self.remove_numbers,
@@ -31,12 +32,19 @@ class TextPreprocessor:
             self.stop_words = set()
     
     def get_available_operations(self):
-        return list(self.operations.keys())
+        return list(op for op in self.operations.keys() if op != "apply_all")
     
     def apply_operation(self, operation: str, text: str) -> str:
         if operation in self.operations:
             return self.operations[operation](text)
         return text
+
+    def apply_all_preprocessing(self, text: str) -> str:
+        processed_text = text
+        for op_name, op_func in self.operations.items():
+            if op_name != "apply_all":
+                processed_text = op_func(processed_text)
+        return processed_text
     
     def to_lowercase(self, text: str) -> str:
         return text.lower()

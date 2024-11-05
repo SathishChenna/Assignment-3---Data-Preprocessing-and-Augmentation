@@ -10,103 +10,156 @@
     <div class="container">
         <h1>File Processor</h1>
         
-        <div class="file-type-selector">
-            <button onclick="switchFileType('text')" class="type-button active" id="textButton">Text Processing</button>
-            <button onclick="switchFileType('image')" class="type-button" id="imageButton">Image Processing</button>
-        </div>
-
-        <div class="upload-section">
-            <div class="file-input-wrapper">
-                <label for="fileInput" class="file-input-label">
-                    Choose a file or drag it here
-                </label>
-                <input type="file" id="fileInput" accept=".txt,.png,.jpg,.jpeg">
+        <div class="file-input-section">
+            <div class="file-type-input">
+                <div class="file-input-wrapper">
+                    <label for="textFileInput" class="file-input-label text-type" id="textInputLabel">
+                        Choose or drag a text file (.txt)
+                    </label>
+                    <input type="file" id="textFileInput" accept=".txt" class="file-input">
+                </div>
+                <div class="file-input-wrapper">
+                    <label for="imageFileInput" class="file-input-label image-type" id="imageInputLabel">
+                        Choose or drag an image file (.png, .jpg, .jpeg)
+                    </label>
+                    <input type="file" id="imageFileInput" accept=".png,.jpg,.jpeg" class="file-input">
+                </div>
+                <div class="file-input-wrapper">
+                    <label for="audioFileInput" class="file-input-label audio-type" id="audioInputLabel">
+                        Choose or drag an audio file (.mp3, .wav)
+                    </label>
+                    <input type="file" id="audioFileInput" accept=".mp3,.wav" class="file-input">
+                </div>
                 <div class="selected-file" id="selectedFileName">No file selected</div>
             </div>
-            <button onclick="processFile()" id="processButton" disabled>Process File</button>
         </div>
 
-        <!-- Text Processing Options -->
-        <div id="textOptions" class="options-section">
-            <div class="preprocess-options">
-                <h2>Text Preprocessing Options</h2>
-                {% for option in preprocess_options %}
-                <div class="checkbox-item">
-                    <input type="checkbox" id="pre_{{ option }}" name="text_preprocess" value="{{ option }}">
-                    <label for="pre_{{ option }}">{{ option.replace('_', ' ').title() }}</label>
-                </div>
-                {% endfor %}
-            </div>
-
-            <div class="augmentation-options">
-                <h2>Text Augmentation Options</h2>
-                {% for option in augmentation_options %}
-                <div class="checkbox-item">
-                    <input type="checkbox" id="aug_{{ option }}" name="text_augmentation" value="{{ option }}">
-                    <label for="aug_{{ option }}">{{ option.replace('_', ' ').title() }}</label>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-
-        <!-- Image Processing Options -->
-        <div id="imageOptions" class="options-section" style="display: none;">
-            <div class="preprocess-options">
-                <h2>Image Preprocessing Options</h2>
-                {% for option in image_preprocess_options %}
-                <div class="checkbox-item">
-                    <input type="checkbox" id="img_pre_{{ option }}" name="image_preprocess" value="{{ option }}">
-                    <label for="img_pre_{{ option }}">{{ option.replace('_', ' ').title() }}</label>
-                </div>
-                {% endfor %}
-            </div>
-
-            <div class="augmentation-options">
-                <h2>Image Augmentation Options</h2>
-                {% for option in image_augmentation_options %}
-                <div class="checkbox-item">
-                    <input type="checkbox" id="img_aug_{{ option }}" name="image_augmentation" value="{{ option }}">
-                    <label for="img_aug_{{ option }}">{{ option.replace('_', ' ').title() }}</label>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-
-        <!-- Results Section -->
+        <!-- Results Section with Integrated Options -->
         <div class="results-section">
-            <!-- Text Results -->
-            <div id="textResults">
-                <div class="original-text">
-                    <h2>Original Text</h2>
-                    <pre id="originalText"></pre>
+            <!-- Original Content -->
+            <div class="result-column">
+                <h2>Original Content</h2>
+                <!-- Text Results -->
+                <div id="textResults">
+                    <div class="original-text">
+                        <pre id="originalText"></pre>
+                    </div>
                 </div>
-
-                <div class="processed-text">
-                    <h2>Processed Text</h2>
-                    <div id="preprocessedResults"></div>
+                <!-- Image Results -->
+                <div id="imageResults" style="display: none;">
+                    <div class="original-image">
+                        <img id="originalImage" alt="Original image">
+                    </div>
                 </div>
-
-                <div class="augmented-text">
-                    <h2>Augmented Text</h2>
-                    <div id="augmentedResults"></div>
+                <!-- Audio Results -->
+                <div id="audioResults" style="display: none;">
+                    <div class="original-audio">
+                        <audio id="originalAudio" controls></audio>
+                        <div class="audio-visualizations">
+                            <div class="waveform">
+                                <h4>Time Domain</h4>
+                                <img id="originalWaveform" alt="Original Waveform">
+                            </div>
+                            <div class="spectrogram">
+                                <h4>Frequency Domain</h4>
+                                <img id="originalSpectrogram" alt="Original Spectrogram">
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Image Results -->
-            <div id="imageResults" style="display: none;">
-                <div class="original-image">
-                    <h2>Original Image</h2>
-                    <img id="originalImage" alt="Original image">
+            <!-- Preprocessing Column -->
+            <div class="result-column">
+                <h2>Preprocessing</h2>
+                <!-- Text Preprocessing -->
+                <div id="textPreprocessing">
+                    <div class="select-container">
+                        <select id="textPreprocessSelect" name="text_preprocess">
+                            <option value="">Select Preprocessing Option</option>
+                            {% for option in preprocess_options %}
+                            <option value="{{ option }}">{{ option.replace('_', ' ').title() }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="processed-text">
+                        <div id="preprocessedResults"></div>
+                    </div>
                 </div>
-
-                <div class="processed-image">
-                    <h2>Processed Images</h2>
-                    <div id="preprocessedImages"></div>
+                <!-- Image Preprocessing -->
+                <div id="imagePreprocessing" style="display: none;">
+                    <div class="select-container">
+                        <select id="imagePreprocessSelect" name="image_preprocess">
+                            <option value="">Select Preprocessing Option</option>
+                            {% for option in image_preprocess_options %}
+                            <option value="{{ option }}">{{ option.replace('_', ' ').title() }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="processed-image">
+                        <div id="preprocessedImages"></div>
+                    </div>
                 </div>
+                <!-- Audio Preprocessing -->
+                <div id="audioPreprocessing" style="display: none;">
+                    <div class="select-container">
+                        <select id="audioPreprocessSelect" name="audio_preprocess">
+                            <option value="">Select Preprocessing Option</option>
+                            {% for option in audio_preprocess_options %}
+                            <option value="{{ option }}">{{ option.replace('_', ' ').title() }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="processed-audio">
+                        <div id="preprocessedAudio"></div>
+                    </div>
+                </div>
+            </div>
 
-                <div class="augmented-image">
-                    <h2>Augmented Images</h2>
-                    <div id="augmentedImages"></div>
+            <!-- Augmentation Column -->
+            <div class="result-column">
+                <h2>Augmentation</h2>
+                <!-- Text Augmentation -->
+                <div id="textAugmentation">
+                    <div class="select-container">
+                        <select id="textAugmentSelect" name="text_augmentation">
+                            <option value="">Select Augmentation Option</option>
+                            {% for option in augmentation_options %}
+                            <option value="{{ option }}">{{ option.replace('_', ' ').title() }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="augmented-text">
+                        <div id="augmentedResults"></div>
+                    </div>
+                </div>
+                <!-- Image Augmentation -->
+                <div id="imageAugmentation" style="display: none;">
+                    <div class="select-container">
+                        <select id="imageAugmentSelect" name="image_augmentation">
+                            <option value="">Select Augmentation Option</option>
+                            {% for option in image_augmentation_options %}
+                            <option value="{{ option }}">{{ option.replace('_', ' ').title() }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="augmented-image">
+                        <div id="augmentedImages"></div>
+                    </div>
+                </div>
+                <!-- Audio Augmentation -->
+                <div id="audioAugmentation" style="display: none;">
+                    <div class="select-container">
+                        <select id="audioAugmentSelect" name="audio_augmentation">
+                            <option value="">Select Augmentation Option</option>
+                            {% for option in audio_augmentation_options %}
+                            <option value="{{ option }}">{{ option.replace('_', ' ').title() }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="augmented-audio">
+                        <div id="augmentedAudio"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -114,93 +167,212 @@
 
     <script>
         let currentFileType = 'text';
+        let currentFile = null;
 
-        function switchFileType(type) {
-            currentFileType = type;
-            document.getElementById('textButton').classList.toggle('active', type === 'text');
-            document.getElementById('imageButton').classList.toggle('active', type === 'image');
-            document.getElementById('textOptions').style.display = type === 'text' ? 'grid' : 'none';
-            document.getElementById('imageOptions').style.display = type === 'image' ? 'grid' : 'none';
-            document.getElementById('textResults').style.display = type === 'text' ? 'block' : 'none';
-            document.getElementById('imageResults').style.display = type === 'image' ? 'block' : 'none';
+        // Add event listeners for both file inputs
+        document.getElementById('textFileInput').addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
             
-            // Update file input accept attribute
-            document.getElementById('fileInput').accept = type === 'text' ? '.txt' : '.png,.jpg,.jpeg';
-            
-            // Clear previous results
+            // Clear previous results and state
             clearResults();
-        }
+            clearSelections();
+            
+            currentFileType = 'text';
+            currentFile = file;
+            document.getElementById('selectedFileName').textContent = file.name;
+            
+            // Update UI for text mode
+            updateUIForFileType('text');
+            // Display file content immediately
+            await displayOriginalContent(file);
+        });
+
+        document.getElementById('imageFileInput').addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            // Clear previous results and state
+            clearResults();
+            clearSelections();
+            
+            currentFileType = 'image';
+            currentFile = file;
+            document.getElementById('selectedFileName').textContent = file.name;
+            
+            // Update UI for image mode
+            updateUIForFileType('image');
+            // Display file content immediately
+            await displayOriginalContent(file);
+        });
+
+        document.getElementById('audioFileInput').addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            // Clear previous results and state
+            clearResults();
+            clearSelections();
+            
+            currentFileType = 'audio';
+            currentFile = file;
+            document.getElementById('selectedFileName').textContent = file.name;
+            
+            // Update UI for audio mode
+            updateUIForFileType('audio');
+            // Display file content immediately
+            await displayOriginalContent(file);
+        });
 
         function clearResults() {
+            // Clear text results
             document.getElementById('originalText').textContent = '';
             document.getElementById('preprocessedResults').innerHTML = '';
             document.getElementById('augmentedResults').innerHTML = '';
+            
+            // Clear image results
             document.getElementById('originalImage').src = '';
             document.getElementById('preprocessedImages').innerHTML = '';
             document.getElementById('augmentedImages').innerHTML = '';
-        }
-
-        document.getElementById('fileInput').addEventListener('change', function(e) {
-            const fileName = e.target.files[0]?.name || 'No file selected';
-            document.getElementById('selectedFileName').textContent = fileName;
-            document.getElementById('processButton').disabled = !e.target.files[0];
-        });
-
-        function formatOperationName(op) {
-            return op.replace(/_/g, ' ').split(' ').map(word => 
-                word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-            ).join(' ');
-        }
-
-        function setLoading(isLoading) {
-            const button = document.getElementById('processButton');
-            button.disabled = isLoading;
-            button.textContent = isLoading ? 'Processing...' : 'Process File';
-        }
-
-        async function processFile() {
-            const fileInput = document.getElementById('fileInput');
-            const file = fileInput.files[0];
             
-            if (!file) {
-                alert('Please select a file first!');
-                return;
-            }
-
-            setLoading(true);
-            clearResults();
-
-            const formData = new FormData();
-            formData.append('file', file);
-
-            if (currentFileType === 'text') {
-                // Handle text processing
-                const preprocessOps = Array.from(document.querySelectorAll('input[name="text_preprocess"]:checked'))
-                    .map(cb => cb.value);
-                const augmentOps = Array.from(document.querySelectorAll('input[name="text_augmentation"]:checked'))
-                    .map(cb => cb.value);
-                
-                preprocessOps.forEach(op => formData.append('preprocess_ops', op));
-                augmentOps.forEach(op => formData.append('augment_ops', op));
-
-                await processTextFile(formData);
-            } else {
-                // Handle image processing
-                const preprocessOps = Array.from(document.querySelectorAll('input[name="image_preprocess"]:checked'))
-                    .map(cb => cb.value);
-                const augmentOps = Array.from(document.querySelectorAll('input[name="image_augmentation"]:checked'))
-                    .map(cb => cb.value);
-                
-                preprocessOps.forEach(op => formData.append('preprocess_ops', op));
-                augmentOps.forEach(op => formData.append('augment_ops', op));
-
-                await processImageFile(formData);
-            }
-
-            setLoading(false);
+            // Clear audio results
+            document.getElementById('originalAudio').src = '';
+            document.getElementById('preprocessedAudio').innerHTML = '';
+            document.getElementById('augmentedAudio').innerHTML = '';
         }
 
-        async function processTextFile(formData) {
+        function clearSelections() {
+            // Clear all select elements
+            document.querySelectorAll('select').forEach(select => {
+                select.value = '';
+            });
+            
+            // Reset file inputs
+            document.getElementById('textFileInput').value = '';
+            document.getElementById('imageFileInput').value = '';
+            document.getElementById('audioFileInput').value = '';
+        }
+
+        function updateUIForFileType(type) {
+            // Update visibility for all types
+            ['text', 'image', 'audio'].forEach(t => {
+                document.getElementById(`${t}Results`).style.display = type === t ? 'block' : 'none';
+                document.getElementById(`${t}Preprocessing`).style.display = type === t ? 'block' : 'none';
+                document.getElementById(`${t}Augmentation`).style.display = type === t ? 'block' : 'none';
+                document.getElementById(`${t}InputLabel`).classList.toggle('active', type === t);
+            });
+        }
+
+        async function displayOriginalContent(file) {
+            try {
+                setBusyCursor(true);
+                
+                if (currentFileType === 'text') {
+                    const text = await file.text();
+                    document.getElementById('originalText').textContent = text;
+                } else if (currentFileType === 'image') {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        document.getElementById('originalImage').src = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                } else if (currentFileType === 'audio') {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        document.getElementById('originalAudio').src = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            } finally {
+                setBusyCursor(false);
+            }
+        }
+
+        async function processPreprocessing() {
+            if (!currentFile) return;
+
+            setBusyCursor(true);
+            
+            const formData = new FormData();
+            formData.append('file', currentFile);
+
+            try {
+                if (currentFileType === 'text') {
+                    const preprocessOp = document.getElementById('textPreprocessSelect').value;
+                    if (preprocessOp) {
+                        formData.append('preprocess_ops', preprocessOp);
+                        await processTextOperation(formData, 'preprocess');
+                    } else {
+                        document.getElementById('preprocessedResults').innerHTML = 
+                            '<div class="result-item">No preprocessing operation selected</div>';
+                    }
+                } else if (currentFileType === 'image') {
+                    const preprocessOp = document.getElementById('imagePreprocessSelect').value;
+                    if (preprocessOp) {
+                        formData.append('preprocess_ops', preprocessOp);
+                        await processImageOperation(formData, 'preprocess');
+                    } else {
+                        document.getElementById('preprocessedImages').innerHTML = 
+                            '<div class="result-item">No preprocessing operation selected</div>';
+                    }
+                } else if (currentFileType === 'audio') {
+                    const preprocessOp = document.getElementById('audioPreprocessSelect').value;
+                    if (preprocessOp) {
+                        formData.append('preprocess_ops', preprocessOp);
+                        await processAudioOperation(formData, 'preprocess');
+                    } else {
+                        document.getElementById('preprocessedAudio').innerHTML = 
+                            '<div class="result-item">No preprocessing operation selected</div>';
+                    }
+                }
+            } finally {
+                setBusyCursor(false);
+            }
+        }
+
+        async function processAugmentation() {
+            if (!currentFile) return;
+
+            setBusyCursor(true);
+            
+            const formData = new FormData();
+            formData.append('file', currentFile);
+
+            try {
+                if (currentFileType === 'text') {
+                    const augmentOp = document.getElementById('textAugmentSelect').value;
+                    if (augmentOp) {
+                        formData.append('augment_ops', augmentOp);
+                        await processTextOperation(formData, 'augment');
+                    } else {
+                        document.getElementById('augmentedResults').innerHTML = 
+                            '<div class="result-item">No augmentation operation selected</div>';
+                    }
+                } else if (currentFileType === 'image') {
+                    const augmentOp = document.getElementById('imageAugmentSelect').value;
+                    if (augmentOp) {
+                        formData.append('augment_ops', augmentOp);
+                        await processImageOperation(formData, 'augment');
+                    } else {
+                        document.getElementById('augmentedImages').innerHTML = 
+                            '<div class="result-item">No augmentation operation selected</div>';
+                    }
+                } else if (currentFileType === 'audio') {
+                    const augmentOp = document.getElementById('audioAugmentSelect').value;
+                    if (augmentOp) {
+                        formData.append('augment_ops', augmentOp);
+                        await processAudioOperation(formData, 'augment');
+                    } else {
+                        document.getElementById('augmentedAudio').innerHTML = 
+                            '<div class="result-item">No augmentation operation selected</div>';
+                    }
+                }
+            } finally {
+                setBusyCursor(false);
+            }
+        }
+
+        async function processTextOperation(formData, type) {
             try {
                 const response = await fetch('/process', {
                     method: 'POST',
@@ -214,36 +386,34 @@
                 
                 const data = await response.json();
                 
-                document.getElementById('originalText').textContent = data.original_text || 'No original text';
-                
-                const preprocessedResults = document.getElementById('preprocessedResults');
-                preprocessedResults.innerHTML = '';
-                if (Object.keys(data.preprocessed_results || {}).length === 0) {
-                    preprocessedResults.innerHTML = '<div class="result-item">No preprocessing operations selected</div>';
+                if (type === 'preprocess') {
+                    const preprocessedResults = document.getElementById('preprocessedResults');
+                    preprocessedResults.innerHTML = '';
+                    if (Object.keys(data.preprocessed_results || {}).length === 0) {
+                        preprocessedResults.innerHTML = '<div class="result-item">No preprocessing results</div>';
+                    } else {
+                        Object.entries(data.preprocessed_results).forEach(([op, text]) => {
+                            preprocessedResults.innerHTML += `
+                                <div class="result-item">
+                                    <pre>${text}</pre>
+                                </div>
+                            `;
+                        });
+                    }
                 } else {
-                    Object.entries(data.preprocessed_results).forEach(([op, text]) => {
-                        preprocessedResults.innerHTML += `
-                            <div class="result-item">
-                                <h3>${formatOperationName(op)}</h3>
-                                <pre>${text}</pre>
-                            </div>
-                        `;
-                    });
-                }
-
-                const augmentedResults = document.getElementById('augmentedResults');
-                augmentedResults.innerHTML = '';
-                if (Object.keys(data.augmented_results || {}).length === 0) {
-                    augmentedResults.innerHTML = '<div class="result-item">No augmentation operations selected</div>';
-                } else {
-                    Object.entries(data.augmented_results).forEach(([op, text]) => {
-                        augmentedResults.innerHTML += `
-                            <div class="result-item">
-                                <h3>${formatOperationName(op)}</h3>
-                                <pre>${text}</pre>
-                            </div>
-                        `;
-                    });
+                    const augmentedResults = document.getElementById('augmentedResults');
+                    augmentedResults.innerHTML = '';
+                    if (Object.keys(data.augmented_results || {}).length === 0) {
+                        augmentedResults.innerHTML = '<div class="result-item">No augmentation results</div>';
+                    } else {
+                        Object.entries(data.augmented_results).forEach(([op, text]) => {
+                            augmentedResults.innerHTML += `
+                                <div class="result-item">
+                                    <pre>${text}</pre>
+                                </div>
+                            `;
+                        });
+                    }
                 }
             } catch (error) {
                 console.error('Error:', error);
@@ -251,7 +421,7 @@
             }
         }
 
-        async function processImageFile(formData) {
+        async function processImageOperation(formData, type) {
             try {
                 const response = await fetch('/process_image', {
                     method: 'POST',
@@ -265,45 +435,160 @@
                 
                 const data = await response.json();
                 
-                // Display original image
-                document.getElementById('originalImage').src = `data:image/png;base64,${data.original_image}`;
-                
-                // Display preprocessed images
-                const preprocessedImages = document.getElementById('preprocessedImages');
-                preprocessedImages.innerHTML = '';
-                if (Object.keys(data.preprocessed_results || {}).length === 0) {
-                    preprocessedImages.innerHTML = '<div class="result-item">No preprocessing operations selected</div>';
+                if (type === 'preprocess') {
+                    const preprocessedImages = document.getElementById('preprocessedImages');
+                    preprocessedImages.innerHTML = '';
+                    if (Object.keys(data.preprocessed_results || {}).length === 0) {
+                        preprocessedImages.innerHTML = '<div class="result-item">No preprocessing results</div>';
+                    } else {
+                        Object.entries(data.preprocessed_results).forEach(([op, imageData]) => {
+                            preprocessedImages.innerHTML += `
+                                <div class="result-item">
+                                    <img src="data:image/png;base64,${imageData}" alt="${op} result">
+                                </div>
+                            `;
+                        });
+                    }
                 } else {
-                    Object.entries(data.preprocessed_results).forEach(([op, imageData]) => {
-                        preprocessedImages.innerHTML += `
-                            <div class="result-item">
-                                <h3>${formatOperationName(op)}</h3>
-                                <img src="data:image/png;base64,${imageData}" alt="${op} result">
-                            </div>
-                        `;
-                    });
-                }
-
-                // Display augmented images
-                const augmentedImages = document.getElementById('augmentedImages');
-                augmentedImages.innerHTML = '';
-                if (Object.keys(data.augmented_results || {}).length === 0) {
-                    augmentedImages.innerHTML = '<div class="result-item">No augmentation operations selected</div>';
-                } else {
-                    Object.entries(data.augmented_results).forEach(([op, imageData]) => {
-                        augmentedImages.innerHTML += `
-                            <div class="result-item">
-                                <h3>${formatOperationName(op)}</h3>
-                                <img src="data:image/png;base64,${imageData}" alt="${op} result">
-                            </div>
-                        `;
-                    });
+                    const augmentedImages = document.getElementById('augmentedImages');
+                    augmentedImages.innerHTML = '';
+                    if (Object.keys(data.augmented_results || {}).length === 0) {
+                        augmentedImages.innerHTML = '<div class="result-item">No augmentation results</div>';
+                    } else {
+                        Object.entries(data.augmented_results).forEach(([op, imageData]) => {
+                            augmentedImages.innerHTML += `
+                                <div class="result-item">
+                                    <img src="data:image/png;base64,${imageData}" alt="${op} result">
+                                </div>
+                            `;
+                        });
+                    }
                 }
             } catch (error) {
                 console.error('Error:', error);
                 alert(`Error processing image: ${error.message}`);
             }
         }
+
+        async function processAudioOperation(formData, type) {
+            try {
+                const response = await fetch('/process_audio', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || 'Server error');
+                }
+                
+                const data = await response.json();
+
+                // Display original visualizations if it's the first load
+                if (data.original_waveform && data.original_spectrogram) {
+                    document.getElementById('originalWaveform').src = 
+                        `data:image/png;base64,${data.original_waveform}`;
+                    document.getElementById('originalSpectrogram').src = 
+                        `data:image/png;base64,${data.original_spectrogram}`;
+                }
+                
+                if (type === 'preprocess') {
+                    const preprocessedAudio = document.getElementById('preprocessedAudio');
+                    preprocessedAudio.innerHTML = '';
+                    if (Object.keys(data.preprocessed_results || {}).length === 0) {
+                        preprocessedAudio.innerHTML = '<div class="result-item">No preprocessing results</div>';
+                    } else {
+                        Object.entries(data.preprocessed_results).forEach(([op, audioData]) => {
+                            const waveform = data.preprocessed_waveforms[op];
+                            const spectrogram = data.preprocessed_spectrograms[op];
+                            preprocessedAudio.innerHTML += `
+                                <div class="result-item">
+                                    <audio src="data:audio/wav;base64,${audioData}" controls></audio>
+                                    <div class="audio-visualizations">
+                                        <div class="waveform">
+                                            <h4>Time Domain</h4>
+                                            <img src="data:image/png;base64,${waveform}" alt="Preprocessed Waveform">
+                                        </div>
+                                        <div class="spectrogram">
+                                            <h4>Frequency Domain</h4>
+                                            <img src="data:image/png;base64,${spectrogram}" alt="Preprocessed Spectrogram">
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                    }
+                } else {
+                    const augmentedAudio = document.getElementById('augmentedAudio');
+                    augmentedAudio.innerHTML = '';
+                    if (Object.keys(data.augmented_results || {}).length === 0) {
+                        augmentedAudio.innerHTML = '<div class="result-item">No augmentation results</div>';
+                    } else {
+                        Object.entries(data.augmented_results).forEach(([op, audioData]) => {
+                            const waveform = data.augmented_waveforms[op];
+                            const spectrogram = data.augmented_spectrograms[op];
+                            augmentedAudio.innerHTML += `
+                                <div class="result-item">
+                                    <audio src="data:audio/wav;base64,${audioData}" controls></audio>
+                                    <div class="audio-visualizations">
+                                        <div class="waveform">
+                                            <h4>Time Domain</h4>
+                                            <img src="data:image/png;base64,${waveform}" alt="Augmented Waveform">
+                                        </div>
+                                        <div class="spectrogram">
+                                            <h4>Frequency Domain</h4>
+                                            <img src="data:image/png;base64,${spectrogram}" alt="Augmented Spectrogram">
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert(`Error processing audio: ${error.message}`);
+            }
+        }
+
+        function setBusyCursor(busy) {
+            document.body.style.cursor = busy ? 'wait' : 'default';
+            // Disable all selects while processing
+            document.querySelectorAll('select').forEach(select => {
+                select.disabled = busy;
+            });
+        }
+
+        function formatOperationName(op) {
+            return op.replace(/_/g, ' ').split(' ').map(word => 
+                word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+            ).join(' ');
+        }
+
+        // Add event listeners for dropdown changes
+        document.getElementById('textPreprocessSelect').addEventListener('change', async function(e) {
+            if (currentFile) await processPreprocessing();
+        });
+
+        document.getElementById('textAugmentSelect').addEventListener('change', async function(e) {
+            if (currentFile) await processAugmentation();
+        });
+
+        document.getElementById('imagePreprocessSelect').addEventListener('change', async function(e) {
+            if (currentFile) await processPreprocessing();
+        });
+
+        document.getElementById('imageAugmentSelect').addEventListener('change', async function(e) {
+            if (currentFile) await processAugmentation();
+        });
+
+        document.getElementById('audioPreprocessSelect').addEventListener('change', async function(e) {
+            if (currentFile) await processPreprocessing();
+        });
+
+        document.getElementById('audioAugmentSelect').addEventListener('change', async function(e) {
+            if (currentFile) await processAugmentation();
+        });
     </script>
 </body>
 </html> 
