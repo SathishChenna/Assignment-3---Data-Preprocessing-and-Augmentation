@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Text Processor</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/styles.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    <div class="container">
+        <h1>Text Processor</h1>
+        
+        <div class="upload-section">
+            <div class="file-input-wrapper">
+                <label for="textFile" class="file-input-label">
+                    Choose a text file or drag it here
+                </label>
+                <input type="file" id="textFile" accept=".txt">
+                <div class="selected-file" id="selectedFileName">No file selected</div>
+            </div>
+            <button onclick="processText()" id="processButton" disabled>Process Text</button>
+        </div>
+
+        <div class="options-section">
+            <div class="preprocess-options">
+                <h2>Preprocessing Options</h2>
+                {% for option in preprocess_options %}
+                <div class="checkbox-item">
+                    <input type="checkbox" id="pre_{{ option }}" name="preprocess" value="{{ option }}">
+                    <label for="pre_{{ option }}">{{ option.replace('_', ' ').title() }}</label>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="augmentation-options">
+                <h2>Augmentation Options</h2>
+                {% for option in augmentation_options %}
+                <div class="checkbox-item">
+                    <input type="checkbox" id="aug_{{ option }}" name="augmentation" value="{{ option }}">
+                    <label for="aug_{{ option }}">{{ option.replace('_', ' ').title() }}</label>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="results-section">
+            <div class="original-text">
+                <h2>Original Text</h2>
+                <pre id="originalText"></pre>
+            </div>
+
+            <div class="processed-text">
+                <h2>Processed Text</h2>
+                <div id="preprocessedResults"></div>
+            </div>
+
+            <div class="augmented-text">
+                <h2>Augmented Text</h2>
+                <div id="augmentedResults"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Update file input display
+        document.getElementById('textFile').addEventListener('change', function(e) {
+            const fileName = e.target.files[0]?.name || 'No file selected';
+            document.getElementById('selectedFileName').textContent = fileName;
+            document.getElementById('processButton').disabled = !e.target.files[0];
+        });
+
+        function formatOperationName(op) {
+            if (typeof op === 'string') {
+                return op.replace(/_/g, ' ').split(' ').map(word => 
+                    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+                ).join(' ');
+            }
+            return 'Unknown Operation';
+        }
+
+        function setLoading(isLoading) {
+            const button = document.getElementById('processButton');
+            button.disabled = isLoading;
+            button.textContent = isLoading ? 'Processing...' : 'Process Text';
+            
+            if (isLoading) {
+                document.getElementById('originalText').innerHTML = '<div class="loading">Loading...</div>';
+                document.getElementById('preprocessedResults').innerHTML = '<div class="loading">Processing...</div>';
+                document.getElementById('augmentedResults').innerHTML = '<div class="loading">Processing...</div>';
+            }
+        }
+
+        async function processText() {
+            const fileInput = document.getElementById('textFile');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('Please select a file first!');
+                return;
+            }
+
+            setLoading(true);
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const preprocessOps = Array.from(document.querySelectorAll('input[name="preprocess"]:checked'))
+                .map(cb => cb.value);
+            preprocessOps.forEach(op => formData.append('preprocess_ops', op));
+
+            const augmentOps = Array.from(document.querySelectorAll('input[name="augmentation"]:checked'))
+                .map(cb => cb.value);
+            augmentOps.forEach(op => formData.append('augment_ops', op));
+
+            try {
+                const response = await fetch('/process', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || 'Server error');
+                }
+                
+                const data = await response.json();
+                
+                document.getElementById('originalText').textContent = data.original_text || 'No original text';
+                
+                const preprocessedResults = document.getElementById('preprocessedResults');
+                preprocessedResults.innerHTML = '';
+                if (Object.keys(data.preprocessed_results || {}).length === 0) {
+                    preprocessedResults.innerHTML = '<div class="result-item">No preprocessing operations selected</div>';
+                } else {
+                    Object.entries(data.preprocessed_results).forEach(([op, text]) => {
+                        preprocessedResults.innerHTML += `
+                            <div class="result-item">
+                                <h3>${formatOperationName(op)}</h3>
+                                <pre>${text}</pre>
+                            </div>
+                        `;
+                    });
+                }
+
+                const augmentedResults = document.getElementById('augmentedResults');
+                augmentedResults.innerHTML = '';
+                if (Object.keys(data.augmented_results || {}).length === 0) {
+                    augmentedResults.innerHTML = '<div class="result-item">No augmentation operations selected</div>';
+                } else {
+                    Object.entries(data.augmented_results).forEach(([op, text]) => {
+                        augmentedResults.innerHTML += `
+                            <div class="result-item">
+                                <h3>${formatOperationName(op)}</h3>
+                                <pre>${text}</pre>
+                            </div>
+                        `;
+                    });
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert(`Error processing text: ${error.message}`);
+                
+                document.getElementById('originalText').textContent = '';
+                document.getElementById('preprocessedResults').innerHTML = '';
+                document.getElementById('augmentedResults').innerHTML = '';
+            } finally {
+                setLoading(false);
+            }
+        }
+    </script>
+</body>
+</html> 
