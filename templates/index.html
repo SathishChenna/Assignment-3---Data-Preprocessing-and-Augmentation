@@ -60,10 +60,6 @@
                                 <h4>Time Domain</h4>
                                 <img id="originalWaveform" alt="Original Waveform">
                             </div>
-                            <div class="spectrogram">
-                                <h4>Frequency Domain</h4>
-                                <img id="originalSpectrogram" alt="Original Spectrogram">
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -484,12 +480,10 @@
                 
                 const data = await response.json();
 
-                // Display original visualizations if it's the first load
-                if (data.original_waveform && data.original_spectrogram) {
+                // Display original waveform if it's the first load
+                if (data.original_waveform) {
                     document.getElementById('originalWaveform').src = 
                         `data:image/png;base64,${data.original_waveform}`;
-                    document.getElementById('originalSpectrogram').src = 
-                        `data:image/png;base64,${data.original_spectrogram}`;
                 }
                 
                 if (type === 'preprocess') {
@@ -500,7 +494,6 @@
                     } else {
                         Object.entries(data.preprocessed_results).forEach(([op, audioData]) => {
                             const waveform = data.preprocessed_waveforms[op];
-                            const spectrogram = data.preprocessed_spectrograms[op];
                             preprocessedAudio.innerHTML += `
                                 <div class="result-item">
                                     <audio src="data:audio/wav;base64,${audioData}" controls></audio>
@@ -508,10 +501,6 @@
                                         <div class="waveform">
                                             <h4>Time Domain</h4>
                                             <img src="data:image/png;base64,${waveform}" alt="Preprocessed Waveform">
-                                        </div>
-                                        <div class="spectrogram">
-                                            <h4>Frequency Domain</h4>
-                                            <img src="data:image/png;base64,${spectrogram}" alt="Preprocessed Spectrogram">
                                         </div>
                                     </div>
                                 </div>
@@ -526,7 +515,6 @@
                     } else {
                         Object.entries(data.augmented_results).forEach(([op, audioData]) => {
                             const waveform = data.augmented_waveforms[op];
-                            const spectrogram = data.augmented_spectrograms[op];
                             augmentedAudio.innerHTML += `
                                 <div class="result-item">
                                     <audio src="data:audio/wav;base64,${audioData}" controls></audio>
@@ -534,10 +522,6 @@
                                         <div class="waveform">
                                             <h4>Time Domain</h4>
                                             <img src="data:image/png;base64,${waveform}" alt="Augmented Waveform">
-                                        </div>
-                                        <div class="spectrogram">
-                                            <h4>Frequency Domain</h4>
-                                            <img src="data:image/png;base64,${spectrogram}" alt="Augmented Spectrogram">
                                         </div>
                                     </div>
                                 </div>

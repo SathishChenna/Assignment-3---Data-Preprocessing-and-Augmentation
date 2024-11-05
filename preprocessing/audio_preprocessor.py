@@ -18,14 +18,13 @@ class AudioPreprocessor:
     def get_available_operations(self):
         return list(self.operations.keys())
     
-    def apply_operation(self, operation: str, audio_data: np.ndarray, sr: int) -> tuple[np.ndarray, int, str, str]:
+    def apply_operation(self, operation: str, audio_data: np.ndarray, sr: int) -> tuple[np.ndarray, int, str]:
         if operation in self.operations:
             processed_audio, processed_sr = self.operations[operation](audio_data, sr)
-            # Generate both time and frequency domain visualizations
-            time_domain = self.generate_waveform(processed_audio, processed_sr)
-            freq_domain = self.generate_spectrogram(processed_audio, processed_sr)
-            return processed_audio, processed_sr, time_domain, freq_domain
-        return audio_data, sr, None, None
+            # Generate time domain visualization
+            waveform = self.generate_waveform(processed_audio, processed_sr)
+            return processed_audio, processed_sr, waveform
+        return audio_data, sr, None
 
     def generate_waveform(self, audio_data: np.ndarray, sr: int) -> str:
         plt.figure(figsize=(10, 2))
@@ -34,23 +33,6 @@ class AudioPreprocessor:
         plt.xlabel('Time (s)')
         plt.ylabel('Amplitude')
         plt.grid(True)
-        
-        # Save plot to bytes buffer
-        buf = io.BytesIO()
-        plt.savefig(buf, format='png', bbox_inches='tight')
-        plt.close()
-        buf.seek(0)
-        
-        # Convert to base64
-        return base64.b64encode(buf.getvalue()).decode('utf-8')
-
-    def generate_spectrogram(self, audio_data: np.ndarray, sr: int) -> str:
-        plt.figure(figsize=(10, 4))
-        plt.specgram(audio_data, Fs=sr, cmap='viridis')
-        plt.colorbar(format='%+2.0f dB')
-        plt.title('Spectrogram')
-        plt.xlabel('Time (s)')
-        plt.ylabel('Frequency (Hz)')
         
         # Save plot to bytes buffer
         buf = io.BytesIO()

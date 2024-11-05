@@ -160,33 +160,28 @@ async def process_audio(
         # Load audio using librosa
         audio_data, sr = librosa.load(audio_bytes)
 
-        # Generate original visualizations
+        # Generate original waveform
         original_waveform = audio_preprocessor.generate_waveform(audio_data, sr)
-        original_spectrogram = audio_preprocessor.generate_spectrogram(audio_data, sr)
 
         # Apply preprocessing
         preprocess_results = {}
         preprocess_waveforms = {}
-        preprocess_spectrograms = {}
         for op in preprocess_ops:
-            processed_audio, processed_sr, waveform, spectrogram = audio_preprocessor.apply_operation(op, audio_data.copy(), sr)
+            processed_audio, processed_sr, waveform = audio_preprocessor.apply_operation(op, audio_data.copy(), sr)
             buffer = io.BytesIO()
             sf.write(buffer, processed_audio, processed_sr, format='WAV')
             preprocess_results[op] = base64.b64encode(buffer.getvalue()).decode('utf-8')
             preprocess_waveforms[op] = waveform
-            preprocess_spectrograms[op] = spectrogram
 
         # Apply augmentation
         augmented_results = {}
         augment_waveforms = {}
-        augment_spectrograms = {}
         for op in augment_ops:
-            augmented_audio, augmented_sr, waveform, spectrogram = audio_augmentor.apply_operation(op, audio_data.copy(), sr)
+            augmented_audio, augmented_sr, waveform = audio_augmentor.apply_operation(op, audio_data.copy(), sr)
             buffer = io.BytesIO()
             sf.write(buffer, augmented_audio, augmented_sr, format='WAV')
             augmented_results[op] = base64.b64encode(buffer.getvalue()).decode('utf-8')
             augment_waveforms[op] = waveform
-            augment_spectrograms[op] = spectrogram
 
         # Convert original audio to base64
         original_buffer = io.BytesIO()
@@ -196,13 +191,10 @@ async def process_audio(
         return JSONResponse(content={
             "original_audio": original_base64,
             "original_waveform": original_waveform,
-            "original_spectrogram": original_spectrogram,
             "preprocessed_results": preprocess_results,
             "preprocessed_waveforms": preprocess_waveforms,
-            "preprocessed_spectrograms": preprocess_spectrograms,
             "augmented_results": augmented_results,
-            "augmented_waveforms": augment_waveforms,
-            "augmented_spectrograms": augment_spectrograms
+            "augmented_waveforms": augment_waveforms
         })
 
     except Exception as e:
