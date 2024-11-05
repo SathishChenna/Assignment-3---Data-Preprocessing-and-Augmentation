@@ -1,11 +1,13 @@
 :root {
-    --primary-color: #2563eb;
-    --primary-hover: #1d4ed8;
+    --primary-color: #3b82f6;
+    --primary-hover: #2563eb;
     --background-color: #f8fafc;
     --card-background: #ffffff;
     --text-color: #1e293b;
     --border-color: #e2e8f0;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
     --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 }
 
 * {
@@ -15,262 +17,179 @@
 }
 
 body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     background-color: var(--background-color);
     color: var(--text-color);
     line-height: 1.5;
 }
 
-.container {
-    max-width: 98vw;
-    margin: 1rem auto;
-    padding: 0 1rem;
-    overflow-x: hidden;
+/* Navbar styles */
+.navbar {
+    background-color: var(--card-background);
+    box-shadow: var(--shadow-sm);
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
 }
 
-h1 {
-    font-size: 2.25rem;
-    font-weight: 700;
-    color: var(--primary-color);
-    margin-bottom: 2rem;
-    text-align: center;
-}
-
-h2 {
-    font-size: 1.5rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
-    color: var(--text-color);
-}
-
-h3 {
-    font-size: 1.25rem;
-    font-weight: 500;
-    margin-bottom: 0.75rem;
-    color: var(--text-color);
-}
-
-/* Update File Type Selector styles */
-.file-type-selector {
+.nav-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem 2rem;
     display: flex;
     justify-content: center;
-    gap: 1rem;
-    margin-bottom: 2rem;
+    align-items: center;
 }
 
-.type-button {
-    padding: 0.75rem 1.5rem;
-    border: 2px solid var(--primary-color);
-    border-radius: 0.5rem;
-    background-color: transparent;
+.logo {
+    font-size: 1.25rem;
+    font-weight: 600;
     color: var(--primary-color);
-    font-weight: 500;
+}
+
+/* Main container */
+.container {
+    max-width: 1200px;
+    margin: 5rem auto 0;
+    padding: 0 2rem;
+}
+
+/* File cards */
+.file-type-cards {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin: 1rem 0;
+}
+
+.file-card {
+    background: var(--primary-color);
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.25rem;
     cursor: pointer;
     transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
 }
 
-.type-button.active {
-    background-color: var(--primary-color);
+.file-card:hover {
+    background: var(--primary-hover);
+}
+
+.file-icon {
+    width: 32px;
+    height: 32px;
     color: white;
-}
-
-.type-button:hover {
-    background-color: var(--primary-hover);
-    border-color: var(--primary-hover);
-    color: white;
-}
-
-.upload-section {
-    background-color: var(--card-background);
-    padding: 2rem;
-    border-radius: 0.75rem;
-    box-shadow: var(--shadow);
-    margin-bottom: 2rem;
-    text-align: center;
-}
-
-.file-input-wrapper {
-    margin-bottom: 1rem;
 }
 
 .file-input-label {
-    display: inline-block;
-    padding: 0.75rem 1.5rem;
-    background-color: var(--background-color);
-    border: 2px dashed var(--border-color);
-    border-radius: 0.5rem;
-    cursor: pointer;
-    margin-bottom: 1rem;
-    transition: all 0.2s ease;
-}
-
-input[type="file"] {
-    display: none;
-}
-
-.selected-file {
-    text-align: center;
-    margin-top: 0.5rem;
-    font-size: 0.875rem;
-    color: #64748b;
-}
-
-/* Remove the old upload-section styles */
-.upload-section
-
-button {
-    background-color: var(--primary-color);
     color: white;
-    padding: 0.75rem 1.5rem;
-    border: none;
-    border-radius: 0.5rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-}
-
-button:hover {
-    background-color: var(--primary-hover);
-}
-
-button:disabled {
-    background-color: #94a3b8;
-    cursor: not-allowed;
-}
-
-/* Options Section */
-.options-section {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
-    margin-bottom: 2rem;
-}
-
-.preprocess-options,
-.augmentation-options {
-    background-color: var(--card-background);
-    padding: 1.5rem;
-    border-radius: 0.75rem;
-    box-shadow: var(--shadow);
-}
-
-.radio-item {
-    display: flex;
-    align-items: center;
-    margin: 0.75rem 0;
-}
-
-.radio-item input[type="radio"] {
-    margin-right: 0.75rem;
-    width: 1.25rem;
-    height: 1.25rem;
-    border-radius: 50%;
-    border: 2px solid var(--border-color);
-    cursor: pointer;
-}
-
-.radio-item label {
-    cursor: pointer;
     font-size: 1rem;
-    color: var(--text-color);
+    font-weight: 600;
+    text-align: left;
 }
 
-.radio-item input[type="radio"]:checked {
-    border-color: var(--primary-color);
-    background-color: var(--primary-color);
+.file-format {
+    display: block;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin-top: 0.25rem;
+    font-weight: 400;
 }
 
-/* Results Section */
+/* Results section */
 .results-section {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
     margin-top: 2rem;
-    width: 100%;
-    overflow-x: auto;
+    height: calc(100vh - 300px);
+    min-height: 500px;
 }
 
 .result-column {
-    min-width: 300px;
-    max-width: 100%;
-    background-color: var(--card-background);
-    padding: 1rem;
-    border-radius: 0.75rem;
-    box-shadow: var(--shadow);
-}
-
-.options-container {
-    background-color: var(--background-color);
-    padding: 1rem;
-    border-radius: 0.5rem;
-    margin-bottom: 1rem;
-}
-
-.result-column h2 {
-    margin-bottom: 1.5rem;
-    text-align: center;
-}
-
-.original-text,
-.processed-text,
-.augmented-text,
-.original-image,
-.processed-image,
-.augmented-image {
-    width: 100%;
-    overflow-x: auto;
-    background-color: var(--background-color);
-    padding: 1rem;
-    border-radius: 0.5rem;
-    max-height: calc(90vh - 200px);
-    overflow-y: auto;
-}
-
-/* Radio buttons styling */
-.radio-item {
     display: flex;
-    align-items: center;
-    margin: 0.75rem 0;
-    padding: 0.5rem;
-    border-radius: 0.25rem;
-    transition: background-color 0.2s;
-}
-
-.radio-item:hover {
-    background-color: var(--border-color);
-}
-
-/* Results styling */
-.result-item {
-    margin-top: 1rem;
-    padding: 1rem;
-    background-color: var(--card-background);
-    border-radius: 0.5rem;
+    flex-direction: column;
+    background: var(--card-background);
+    border-radius: 1rem;
+    overflow: hidden;
     box-shadow: var(--shadow);
+    height: 100%;
 }
 
-.result-item img {
-    max-width: 100%;
-    height: auto;
-    object-fit: contain;
-}
-
-#originalImage {
-    max-width: 100%;
-    height: auto;
-    object-fit: contain;
-}
-
-.loading {
+.column-header {
+    background: var(--primary-color);
+    color: white;
+    padding: 1rem;
     text-align: center;
+}
+
+.column-header h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.content-card {
+    padding: 1.5rem;
+    height: calc(90vh - 200px);
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-color) var(--background-color);
+}
+
+/* Webkit scrollbar styling */
+.content-card::-webkit-scrollbar {
+    width: 8px;
+}
+
+.content-card::-webkit-scrollbar-track {
+    background: var(--background-color);
+    border-radius: 4px;
+}
+
+.content-card::-webkit-scrollbar-thumb {
+    background-color: var(--primary-color);
+    border-radius: 4px;
+}
+
+/* Visualization card */
+.visualization-card {
+    background: var(--background-color);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-top: 1rem;
+    overflow: hidden;
+}
+
+.waveform h4 {
+    font-size: 0.875rem;
+    color: var(--text-color);
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+
+.waveform img {
+    max-width: 100%;
+    height: auto;
+    object-fit: contain;
+}
+
+/* Footer */
+.footer {
+    background: var(--card-background);
     padding: 2rem;
+    margin-top: 4rem;
+    text-align: center;
     color: #64748b;
 }
 
-/* Responsive Design */
-@media (max-width: 1200px) {
+/* Responsive design */
+@media (max-width: 1024px) {
     .results-section {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 
@@ -279,307 +198,221 @@ button:disabled {
         grid-template-columns: 1fr;
     }
     
-    .result-column {
-        min-width: unset;
+    .nav-content {
+        padding: 1rem;
     }
     
     .container {
-        padding: 0 0.5rem;
+        padding: 0 1rem;
+    }
+
+    .content-card {
+        height: calc(70vh - 100px);
+    }
+
+    .results-section {
+        height: auto;
+        min-height: auto;
+    }
+
+    .result-column {
+        height: auto;
+        min-height: 400px;
+    }
+
+    .file-type-cards {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .file-card {
+        width: 100%;
+        max-width: 300px;
+        justify-content: center;
     }
 }
 
-/* Remove radio button styles and add select styles */
-.select-container {
-    margin-bottom: 1rem;
-    width: 100%;
-}
+/* Keep all the existing styles below this point */
+/* ... rest of your original styles ... */
 
-select {
+/* Add these styles to your existing CSS */
+
+/* Select styling */
+.select-container select {
     width: 100%;
-    max-width: 100%;
     padding: 0.75rem;
     border: 2px solid var(--border-color);
     border-radius: 0.5rem;
     background-color: var(--background-color);
-    color: var(--text-color);
     font-size: 0.875rem;
+    color: var(--text-color);
     cursor: pointer;
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-    background-repeat: no-repeat;
-    background-position: right 0.5rem center;
-    background-size: 1em;
-    padding-right: 2rem;
-}
-
-select:hover {
-    border-color: var(--primary-color);
-}
-
-select:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
-}
-
-select option {
-    padding: 0.5rem;
-}
-
-/* Text content */
-pre {
-    white-space: pre-wrap;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-    max-width: 100%;
-}
-
-/* Add these styles to your existing CSS */
-
-/* Cursor styles */
-.processing {
-    cursor: wait !important;
-}
-
-/* Disabled select styling */
-select:disabled {
-    opacity: 0.6;
-    cursor: wait;
-}
-
-/* Processing indicator */
-.processing-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(255, 255, 255, 0.7);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-}
-
-.processing-spinner {
-    width: 40px;
-    height: 40px;
-    border: 4px solid var(--border-color);
-    border-top: 4px solid var(--primary-color);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-/* Update the file input section styles */
-.file-input-section {
-    margin-bottom: 2rem;
-}
-
-.file-type-input {
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
     margin-bottom: 1rem;
 }
 
-.file-input-wrapper {
-    flex: 1;
-    max-width: 400px;
-    cursor: pointer;
+.select-container select:hover {
+    border-color: var(--primary-color);
 }
 
-.file-input-label {
-    display: block;
-    padding: 1.5rem;
-    background-color: var(--background-color);
-    border: 2px solid var(--border-color);
+/* Results styling */
+.result-item {
+    background: var(--background-color);
     border-radius: 0.5rem;
-    text-align: center;
-    transition: all 0.2s ease;
-    cursor: pointer;
-}
-
-.file-input-label.active {
-    border-color: var(--primary-color);
-    background-color: var(--primary-color);
-    color: white;
-}
-
-.file-input-label:hover {
-    border-color: var(--primary-color);
-    color: var(--primary-color);
-}
-
-.file-input-label.active:hover {
-    background-color: var(--primary-hover);
-    border-color: var(--primary-hover);
-    color: white;
-}
-
-input[type="file"] {
-    display: none;
-}
-
-.selected-file {
-    text-align: center;
-    margin-top: 0.5rem;
-    font-size: 0.875rem;
-    color: #64748b;
-}
-
-/* Remove the old file-type-selector styles */
-.file-type-selector {
-    display: none;
-}
-
-/* Update responsive design for file input */
-@media (max-width: 768px) {
-    .file-type-input {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .file-input-wrapper {
-        max-width: none;
-    }
-}
-
-/* Audio and Spectrogram styles */
-.spectrogram {
-    margin-top: 1rem;
-    width: 100%;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    transition: transform 0.2s;
     overflow: hidden;
-    border-radius: 0.5rem;
-    background-color: var(--background-color);
+}
+
+.result-item pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-x: auto;
+    max-width: 100%;
+    font-size: 0.875rem;
+    line-height: 1.5;
     padding: 0.5rem;
 }
 
-.spectrogram img {
-    width: 100%;
+.result-item img {
+    max-width: 100%;
     height: auto;
-    display: block;
     border-radius: 0.25rem;
 }
 
 .result-item audio {
     width: 100%;
-    margin-bottom: 0.5rem;
+    margin: 0.5rem 0;
 }
 
-.original-audio,
-.processed-audio,
-.augmented-audio {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.result-item {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-/* Audio Visualization styles */
-.audio-visualizations {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
+/* Audio visualization */
+.visualization-card {
+    background: var(--background-color);
+    border-radius: 0.5rem;
+    padding: 1rem;
     margin-top: 1rem;
-    background-color: var(--background-color);
-    padding: 1.25rem;
-    border-radius: 0.5rem;
 }
 
-.waveform, .spectrogram {
-    background-color: var(--card-background);
-    padding: 1.25rem;
-    border-radius: 0.5rem;
-    box-shadow: var(--shadow);
-    min-height: 200px;
-    display: flex;
-    flex-direction: column;
-}
-
-.waveform h4, .spectrogram h4 {
-    margin-bottom: 1rem;
+.waveform h4 {
+    font-size: 0.875rem;
+    color: var(--text-color);
+    margin-bottom: 0.5rem;
     text-align: center;
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--primary-color);
-    padding-bottom: 0.5rem;
-    border-bottom: 2px solid var(--border-color);
 }
 
-.waveform img, .spectrogram img {
+.waveform img {
     width: 100%;
     height: auto;
-    display: block;
     border-radius: 0.25rem;
-    object-fit: contain;
 }
 
-/* Audio player styling */
-audio {
-    width: 100%;
-    margin: 0.75rem 0;
+/* Empty state styling */
+.empty-state {
+    text-align: center;
+    padding: 2rem;
+    color: #64748b;
+    font-size: 0.875rem;
+}
+
+/* Processing state */
+.processing {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+/* Content card padding */
+.content-card {
+    padding: 1.5rem;
+    height: 100%;
+    overflow-y: auto;
+    max-height: 500px;
+}
+
+/* Add these styles for image results */
+.image-result {
+    text-align: center;
+}
+
+.image-result h4 {
+    margin-bottom: 1rem;
+    color: var(--text-color);
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.image-result img {
+    max-width: 100%;
+    height: auto;
+    object-fit: contain;
     border-radius: 0.5rem;
-    background-color: var(--background-color);
+    box-shadow: var(--shadow-sm);
 }
 
 .result-item {
-    background-color: var(--card-background);
-    padding: 1.5rem;
-    border-radius: 0.75rem;
-    margin-bottom: 1.5rem;
-    box-shadow: var(--shadow);
+    background: var(--background-color);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    transition: transform 0.2s;
 }
 
-/* Responsive layout for audio visualizations */
-@media (min-width: 768px) {
-    .audio-visualizations {
-        flex-direction: row;
-    }
-
-    .waveform, .spectrogram {
-        flex: 1;
-        min-width: 0; /* Prevents flex items from overflowing */
-    }
-}
-
-/* Loading state for audio processing */
-.processing .audio-visualizations {
-    opacity: 0.6;
-    pointer-events: none;
-}
-
-.processing audio {
-    opacity: 0.6;
-    pointer-events: none;
-}
-
-/* Audio visualization container animations */
-.audio-visualizations {
-    transition: all 0.3s ease;
-}
-
-.waveform, .spectrogram {
-    transition: transform 0.2s ease;
-}
-
-.waveform:hover, .spectrogram:hover {
+.result-item:hover {
     transform: translateY(-2px);
 }
 
-/* Audio player hover effects */
-audio:hover {
-    transform: scale(1.01);
-    transition: transform 0.2s ease;
+/* Update text and image specific styles */
+
+/* Text specific styles */
+.original-text pre,
+.result-item pre {
+    white-space: pre-wrap;       /* Wrap text */
+    word-wrap: break-word;       /* Break words that are too long */
+    word-break: break-word;      /* Break words at appropriate points */
+    overflow-wrap: break-word;   /* Ensure words wrap */
+    font-size: 0.875rem;
+    line-height: 1.5;
+    padding: 0.5rem;
+    max-width: 100%;            /* Ensure text stays within container */
+}
+
+/* Image specific styles */
+.original-image,
+.image-result {
+    max-height: calc(90vh - 250px); /* Adjust height for scrolling */
+    overflow-y: auto;              /* Enable vertical scrolling */
+    scrollbar-width: thin;         /* Firefox scrollbar */
+    scrollbar-color: var(--primary-color) var(--background-color);
+}
+
+.original-image img,
+.image-result img {
+    width: 100%;                  /* Take full width */
+    height: auto;                 /* Maintain aspect ratio */
+    object-fit: contain;          /* Ensure image fits properly */
+    border-radius: 0.5rem;
+    box-shadow: var(--shadow-sm);
+}
+
+/* Webkit scrollbar for image containers */
+.original-image::-webkit-scrollbar,
+.image-result::-webkit-scrollbar {
+    width: 8px;
+}
+
+.original-image::-webkit-scrollbar-track,
+.image-result::-webkit-scrollbar-track {
+    background: var(--background-color);
+    border-radius: 4px;
+}
+
+.original-image::-webkit-scrollbar-thumb,
+.image-result::-webkit-scrollbar-thumb {
+    background-color: var(--primary-color);
+    border-radius: 4px;
+}
+
+/* Update content card to remove default scrolling */
+.content-card {
+    padding: 1.5rem;
+    height: 100%;
 }
