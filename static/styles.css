@@ -49,6 +49,37 @@ h3 {
     color: var(--text-color);
 }
 
+/* File Type Selector */
+.file-type-selector {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.type-button {
+    padding: 0.75rem 1.5rem;
+    border: 2px solid var(--primary-color);
+    border-radius: 0.5rem;
+    background-color: transparent;
+    color: var(--primary-color);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.type-button.active {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.type-button:hover {
+    background-color: var(--primary-hover);
+    border-color: var(--primary-hover);
+    color: white;
+}
+
+/* Upload Section */
 .upload-section {
     background-color: var(--card-background);
     padding: 2rem;
@@ -108,6 +139,7 @@ button:disabled {
     cursor: not-allowed;
 }
 
+/* Options Section */
 .options-section {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -144,6 +176,7 @@ button:disabled {
     color: var(--text-color);
 }
 
+/* Results Section */
 .results-section {
     display: grid;
     grid-template-columns: 1fr;
@@ -152,13 +185,17 @@ button:disabled {
 
 .original-text,
 .processed-text,
-.augmented-text {
+.augmented-text,
+.original-image,
+.processed-image,
+.augmented-image {
     background-color: var(--card-background);
     padding: 1.5rem;
     border-radius: 0.75rem;
     box-shadow: var(--shadow);
 }
 
+/* Text Results */
 pre {
     background-color: var(--background-color);
     padding: 1rem;
@@ -172,11 +209,26 @@ pre {
     margin-top: 0.5rem;
 }
 
+/* Image Results */
 .result-item {
     background-color: var(--background-color);
     padding: 1rem;
     border-radius: 0.5rem;
     margin: 1rem 0;
+}
+
+.result-item img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+#originalImage {
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+    margin-top: 0.5rem;
 }
 
 .loading {
@@ -185,6 +237,7 @@ pre {
     color: #64748b;
 }
 
+/* Responsive Design */
 @media (max-width: 768px) {
     .container {
         margin: 1rem auto;
@@ -196,5 +249,14 @@ pre {
     
     .options-section {
         grid-template-columns: 1fr;
+    }
+
+    .file-type-selector {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .type-button {
+        width: 100%;
     }
 } 
