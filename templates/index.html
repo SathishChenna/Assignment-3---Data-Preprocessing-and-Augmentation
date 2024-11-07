@@ -15,8 +15,23 @@
 
     <div class="container">
         <div class="file-input-section">
+            <div class="format-selection">
+                <label>
+                    <input type="radio" name="format" value="text" checked>
+                    <span>Text</span>
+                </label>
+                <label>
+                    <input type="radio" name="format" value="image">
+                    <span>Image</span>
+                </label>
+                <label>
+                    <input type="radio" name="format" value="audio">
+                    <span>Audio</span>
+                </label>
+            </div>
+
             <div class="file-type-cards">
-                <div class="file-card">
+                <div class="file-card" id="textCard">
                     <div class="file-icon text-icon">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -33,7 +48,7 @@
                     <input type="file" id="textFileInput" accept=".txt" class="file-input">
                 </div>
 
-                <div class="file-card">
+                <div class="file-card" id="imageCard" style="display: none;">
                     <div class="file-icon image-icon">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
@@ -48,7 +63,7 @@
                     <input type="file" id="imageFileInput" accept=".png,.jpg,.jpeg" class="file-input">
                 </div>
 
-                <div class="file-card">
+                <div class="file-card" id="audioCard" style="display: none;">
                     <div class="file-icon audio-icon">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M9 18V5l12-2v13"></path>
@@ -234,7 +249,10 @@
 
         async function handleFileInput(e, type) {
             const file = e.target.files[0];
-            if (!file) return;
+            if (!file) {
+                hideOriginalContent();
+                return;
+            }
             
             clearResults();
             clearSelections();
@@ -244,6 +262,13 @@
             
             updateUIForFileType(type);
             await displayOriginalContent(file);
+        }
+
+        function hideOriginalContent() {
+            document.getElementById('originalImage').style.display = 'none';
+            document.getElementById('originalWaveform').style.display = 'none';
+            document.getElementById('originalAudio').style.display = 'none';
+            document.getElementById('originalText').textContent = '';
         }
 
         async function displayOriginalContent(file) {
@@ -256,7 +281,9 @@
                 } else if (currentFileType === 'image') {
                     const reader = new FileReader();
                     reader.onload = function(e) {
-                        document.getElementById('originalImage').src = e.target.result;
+                        const img = document.getElementById('originalImage');
+                        img.src = e.target.result;
+                        img.style.display = 'block';
                     };
                     reader.readAsDataURL(file);
                 } else if (currentFileType === 'audio') {
@@ -264,14 +291,14 @@
                     formData.append('file', file);
                     
                     try {
-                        // First set the audio source
                         const reader = new FileReader();
                         reader.onload = function(e) {
-                            document.getElementById('originalAudio').src = e.target.result;
+                            const audio = document.getElementById('originalAudio');
+                            audio.src = e.target.result;
+                            audio.style.display = 'block';
                         };
                         reader.readAsDataURL(file);
                         
-                        // Then get the waveform from backend
                         const response = await fetch('/process_audio', {
                             method: 'POST',
                             body: formData
@@ -285,7 +312,7 @@
                         if (data.original_waveform) {
                             const waveformImg = document.getElementById('originalWaveform');
                             waveformImg.src = `data:image/png;base64,${data.original_waveform}`;
-                            waveformImg.style.display = 'block'; // Ensure the image is visible
+                            waveformImg.style.display = 'block';
                         }
                     } catch (error) {
                         console.error('Error getting waveform:', error);
@@ -302,12 +329,12 @@
             document.getElementById('preprocessedResults').innerHTML = '';
             document.getElementById('augmentedResults').innerHTML = '';
             
-            document.getElementById('originalImage').src = '';
+            document.getElementById('originalImage').style.display = 'none';
             document.getElementById('preprocessedImages').innerHTML = '';
             document.getElementById('augmentedImages').innerHTML = '';
             
-            document.getElementById('originalAudio').src = '';
-            document.getElementById('originalWaveform').src = '';
+            document.getElementById('originalAudio').style.display = 'none';
+            document.getElementById('originalWaveform').style.display = 'none';
             document.getElementById('preprocessedAudio').innerHTML = '';
             document.getElementById('augmentedAudio').innerHTML = '';
         }
@@ -328,7 +355,32 @@
         }
 
         async function processPreprocessing() {
-            if (!currentFile) return;
+            if (!currentFile) {
+                const selectId = `${currentFileType}PreprocessSelect`;
+                const operation = document.getElementById(selectId).value;
+                
+                if (operation) {
+                    let resultContainer;
+                    switch(currentFileType) {
+                        case 'text':
+                            resultContainer = document.getElementById('preprocessedResults');
+                            break;
+                        case 'image':
+                            resultContainer = document.getElementById('preprocessedImages');
+                            break;
+                        case 'audio':
+                            resultContainer = document.getElementById('preprocessedAudio');
+                            break;
+                    }
+                    
+                    if (resultContainer) {
+                        resultContainer.innerHTML = '<div class="result-item">Please upload a file first before selecting a preprocessing operation.</div>';
+                        // Reset the select dropdown
+                        document.getElementById(selectId).value = '';
+                    }
+                }
+                return;
+            }
 
             setBusyCursor(true);
             const formData = new FormData();
@@ -367,7 +419,32 @@
         }
 
         async function processAugmentation() {
-            if (!currentFile) return;
+            if (!currentFile) {
+                const selectId = `${currentFileType}AugmentSelect`;
+                const operation = document.getElementById(selectId).value;
+                
+                if (operation) {
+                    let resultContainer;
+                    switch(currentFileType) {
+                        case 'text':
+                            resultContainer = document.getElementById('augmentedResults');
+                            break;
+                        case 'image':
+                            resultContainer = document.getElementById('augmentedImages');
+                            break;
+                        case 'audio':
+                            resultContainer = document.getElementById('augmentedAudio');
+                            break;
+                    }
+                    
+                    if (resultContainer) {
+                        resultContainer.innerHTML = '<div class="result-item">Please upload a file first before selecting an augmentation operation.</div>';
+                        // Reset the select dropdown
+                        document.getElementById(selectId).value = '';
+                    }
+                }
+                return;
+            }
 
             setBusyCursor(true);
             const formData = new FormData();
@@ -473,6 +550,44 @@
         ['text', 'image', 'audio'].forEach(type => {
             document.getElementById(`${type}PreprocessSelect`).addEventListener('change', processPreprocessing);
             document.getElementById(`${type}AugmentSelect`).addEventListener('change', processAugmentation);
+        });
+
+        const formatRadios = document.getElementsByName('format');
+        const fileInput = document.getElementById('fileInput');
+
+        const acceptedFormats = {
+            'audio': '.wav,.mp3,.ogg',
+            'image': '.jpg,.jpeg,.png,.gif',
+            'text': '.txt,.doc,.docx,.pdf'
+        };
+
+        formatRadios.forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                fileInput.accept = acceptedFormats[e.target.value];
+            });
+        });
+
+        document.querySelectorAll('input[name="format"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                // Hide all cards
+                document.querySelectorAll('.file-card').forEach(card => {
+                    card.style.display = 'none';
+                });
+                
+                // Show only the selected card
+                const selectedType = e.target.value;
+                document.getElementById(`${selectedType}Card`).style.display = 'flex';
+                
+                // Update the current file type
+                currentFileType = selectedType;
+                
+                // Clear any existing results
+                clearResults();
+                clearSelections();
+                
+                // Update UI for the selected file type
+                updateUIForFileType(selectedType);
+            });
         });
     </script>
 </body>
