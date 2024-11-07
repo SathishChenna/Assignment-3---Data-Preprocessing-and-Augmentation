@@ -571,20 +571,13 @@
 
         document.querySelectorAll('input[name="format"]').forEach(radio => {
             radio.addEventListener('change', (e) => {
-                // Hide all cards
+                // Hide all cards and reset inputs
                 document.querySelectorAll('.file-card').forEach(card => {
                     card.style.display = 'none';
-                    
-                    // Reset file inputs and their labels
                     const input = card.querySelector('input[type="file"]');
                     const label = card.querySelector('.file-input-label');
                     
-                    // Clear the file input
-                    if (input) {
-                        input.value = '';
-                    }
-                    
-                    // Reset the label text with file extensions
+                    if (input) input.value = '';
                     if (label) {
                         const type = card.id.replace('Card', '');
                         const extensions = type === 'text' ? '(.txt)' :
@@ -594,30 +587,17 @@
                     }
                 });
                 
-                // Show only the selected card
+                // Show selected card and update state
                 const selectedType = e.target.value;
                 document.getElementById(`${selectedType}Card`).style.display = 'flex';
-                
-                // Update the current file type
                 currentFileType = selectedType;
-                currentFile = null;  // Reset current file
+                currentFile = null;
                 
-                // Clear any existing results
                 clearResults();
                 clearSelections();
-                
-                // Update UI for the selected file type
                 updateUIForFileType(selectedType);
             });
         });
-
-        // Add this function to reset file inputs
-        function resetFileInputs() {
-            document.querySelectorAll('.file-input').forEach(input => {
-                input.value = '';
-                updateFileLabel(input);
-            });
-        }
     </script>
 </body>
 </html> 

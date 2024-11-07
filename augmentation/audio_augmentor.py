@@ -1,10 +1,16 @@
-import librosa
-import numpy as np
-import random
+import torch
+import torchaudio
+import torchaudio.transforms as T
+import torchaudio.functional as F
 import matplotlib.pyplot as plt
 import io
 import base64
-from scipy import signal
+import random
+import logging
+from utils.audio_utils import generate_waveform
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 class AudioAugmentor:
     def __init__(self):
@@ -19,78 +25,129 @@ class AudioAugmentor:
             "chorus": self.apply_chorus,
             "echo": self.add_echo
         }
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        logger.info(f"Using device: {self.device}")
     
     def get_available_operations(self):
         return list(self.operations.keys())
     
-    def apply_operation(self, operation: str, audio_data: np.ndarray, sr: int) -> tuple[np.ndarray, int, str]:
-        if operation in self.operations:
-            augmented_audio, augmented_sr = self.operations[operation](audio_data, sr)
-            waveform = self.generate_waveform(augmented_audio, augmented_sr)
-            return augmented_audio, augmented_sr, waveform
-        return audio_data, sr, None
+    def apply_operation(self, operation: str, audio_tensor: torch.Tensor, sr: int) -> tuple[torch.Tensor, int, str]:
+        try:
+            if operation in self.operations:
+                logger.debug(f"Applying operation: {operation}")
+                augmented_audio, augmented_sr = self.operations[operation](audio_tensor.to(self.device), sr)
+                waveform = generate_waveform(augmented_audio.cpu(), augmented_sr)
+                return augmented_audio, augmented_sr, waveform
+            return audio_tensor, sr, None
+        except Exception as e:
+            logger.error(f"Error in {operation}: {str(e)}")
+            return audio_tensor, sr, None
 
-    def generate_waveform(self, audio_data: np.ndarray, sr: int) -> str:
-        plt.figure(figsize=(10, 2))
-        plt.plot(np.linspace(0, len(audio_data)/sr, len(audio_data)), audio_data)
-        plt.title('Waveform')
-        plt.xlabel('Time (s)')
-        plt.ylabel('Amplitude')
-        plt.grid(True)
-        
-        buf = io.BytesIO()
-        plt.savefig(buf, format='png', bbox_inches='tight')
-        plt.close()
-        buf.seek(0)
-        
-        return base64.b64encode(buf.getvalue()).decode('utf-8')
+    def pitch_shift(self, audio_tensor: torch.Tensor, sr: int) -> tuple[torch.Tensor, int]:
+        try:
+            n_steps = random.uniform(-4, 4)
+            logger.debug(f"Pitch shifting by {n_steps} steps")
+            pitch_shifter = T.PitchShift(sr, n_steps)
+            return pitch_shifter(audio_tensor), sr
+        except Exception as e:
+            logger.error(f"Error in pitch shift: {str(e)}")
+            return audio_tensor, sr
 
-    def pitch_shift(self, audio_data: np.ndarray, sr: int) -> tuple[np.ndarray, int]:
-        steps = random.uniform(-4, 4)
-        return librosa.effects.pitch_shift(audio_data, sr=sr, n_steps=steps), sr
+    def time_stretch(self, audio_tensor: torch.Tensor, sr: int) -> tuple[torch.Tensor, int]:
+        try:
+            rate = random.uniform(0.8, 1.2)
+            logger.debug(f"Time stretching with rate {rate}")
+            stretch = T.TimeStretch(n_freq=128, hop_length=512)
+            return stretch(audio_tensor, rate), sr
+        except Exception as e:
+            logger.error(f"Error in time stretch: {str(e)}")
+            return audio_tensor, sr
 
-    def time_stretch(self, audio_data: np.ndarray, sr: int) -> tuple[np.ndarray, int]:
-        rate = random.uniform(0.8, 1.2)
-        return librosa.effects.time_stretch(audio_data, rate=rate), sr
+    def add_noise(self, audio_tensor: torch.Tensor, sr: int) -> tuple[torch.Tensor, int]:
+        try:
+            noise = torch.randn_like(audio_tensor) * 0.005
+            return torch.clamp(audio_tensor + noise, -1, 1), sr
+        except Exception as e:
+            logger.error(f"Error adding noise: {str(e)}")
+            return audio_tensor, sr
 
-    def add_noise(self, audio_data: np.ndarray, sr: int) -> tuple[np.ndarray, int]:
-        noise = np.random.normal(0, 0.005, audio_data.shape)
-        return audio_data + noise, sr
+    def reverse_audio(self, audio_tensor: torch.Tensor, sr: int) -> tuple[torch.Tensor, int]:
+        try:
+            return torch.flip(audio_tensor, [-1]), sr
+        except Exception as e:
+            logger.error(f"Error reversing audio: {str(e)}")
+            return audio_tensor, sr
 
-    def reverse_audio(self, audio_data: np.ndarray, sr: int) -> tuple[np.ndarray, int]:
-        return np.flip(audio_data), sr
+    def change_volume(self, audio_tensor: torch.Tensor, sr: int) -> tuple[torch.Tensor, int]:
+        try:
+            volume = random.uniform(0.5, 1.5)
+            logger.debug(f"Changing volume by factor {volume}")
+            return audio_tensor * volume, sr
+        except Exception as e:
+            logger.error(f"Error changing volume: {str(e)}")
+            return audio_tensor, sr
 
-    def change_volume(self, audio_data: np.ndarray, sr: int) -> tuple[np.ndarray, int]:
-        volume = random.uniform(0.5, 1.5)
-        return audio_data * volume, sr
+    def room_simulation(self, audio_tensor: torch.Tensor, sr: int) -> tuple[torch.Tensor, int]:
+        try:
+            # Create room impulse response using exponential decay
+            ir_length = sr // 2
+            ir = torch.exp(-torch.linspace(0, 5, ir_length)).to(self.device)
+            ir = ir.unsqueeze(0)  # Add channel dimension
+            
+            # Apply convolution for room effect
+            audio_tensor = F.convolve(audio_tensor, ir)
+            return audio_tensor, sr
+        except Exception as e:
+            logger.error(f"Error in room simulation: {str(e)}")
+            return audio_tensor, sr
 
-    def room_simulation(self, audio_data: np.ndarray, sr: int) -> tuple[np.ndarray, int]:
-        room_ir = np.exp(-np.linspace(0, 2, sr//2))
-        return signal.convolve(audio_data, room_ir, mode='same'), sr
+    def apply_compression(self, audio_tensor: torch.Tensor, sr: int) -> tuple[torch.Tensor, int]:
+        try:
+            threshold = 0.1
+            ratio = 4.0
+            logger.debug(f"Applying compression with threshold {threshold} and ratio {ratio}")
+            
+            magnitude = torch.abs(audio_tensor)
+            mask = magnitude > threshold
+            compressed = torch.where(
+                mask,
+                threshold + (magnitude - threshold) / ratio * torch.sign(audio_tensor),
+                audio_tensor
+            )
+            return compressed, sr
+        except Exception as e:
+            logger.error(f"Error applying compression: {str(e)}")
+            return audio_tensor, sr
 
-    def apply_compression(self, audio_data: np.ndarray, sr: int) -> tuple[np.ndarray, int]:
-        threshold = 0.1
-        ratio = 4.0
-        audio_data = np.where(
-            np.abs(audio_data) > threshold,
-            threshold + (np.abs(audio_data) - threshold) / ratio * np.sign(audio_data),
-            audio_data
-        )
-        return audio_data, sr
+    def apply_chorus(self, audio_tensor: torch.Tensor, sr: int) -> tuple[torch.Tensor, int]:
+        try:
+            delays = [int(sr * d) for d in [0.02, 0.03, 0.04]]
+            depths = [0.8, 0.6, 0.4]
+            logger.debug(f"Applying chorus with {len(delays)} voices")
+            
+            chorus = torch.zeros_like(audio_tensor)
+            for delay, depth in zip(delays, depths):
+                pad = torch.zeros(audio_tensor.shape[0], delay).to(self.device)
+                delayed = torch.cat([pad, audio_tensor[..., :-delay]], dim=-1)
+                chorus += delayed * depth
+            
+            return (audio_tensor + chorus) / 2, sr
+        except Exception as e:
+            logger.error(f"Error applying chorus: {str(e)}")
+            return audio_tensor, sr
 
-    def apply_chorus(self, audio_data: np.ndarray, sr: int) -> tuple[np.ndarray, int]:
-        delays = [int(sr * d) for d in [0.02, 0.03, 0.04]]
-        depths = [0.8, 0.6, 0.4]
-        chorus = np.zeros_like(audio_data)
-        for delay, depth in zip(delays, depths):
-            delayed = np.pad(audio_data, (delay, 0))[:len(audio_data)]
-            chorus += delayed * depth
-        return (audio_data + chorus) / 2, sr
-
-    def add_echo(self, audio_data: np.ndarray, sr: int) -> tuple[np.ndarray, int]:
-        delay_time = 0.3  # seconds
-        decay = 0.5
-        delay_samples = int(sr * delay_time)
-        echo = np.zeros_like(audio_data)
-        echo[delay_samples:] = audio_data[:-delay_samples] * decay
-        return audio_data + echo, sr
+    def add_echo(self, audio_tensor: torch.Tensor, sr: int) -> tuple[torch.Tensor, int]:
+        try:
+            delay_time = 0.3  # seconds
+            decay = 0.5
+            delay_samples = int(sr * delay_time)
+            logger.debug(f"Adding echo with {delay_time}s delay and {decay} decay")
+            
+            pad = torch.zeros(audio_tensor.shape[0], delay_samples).to(self.device)
+            delayed = torch.cat([pad, audio_tensor[..., :-delay_samples]], dim=-1)
+            echo = delayed * decay
+            
+            return audio_tensor + echo, sr
+        except Exception as e:
+            logger.error(f"Error adding echo: {str(e)}")
+            return audio_tensor, sr

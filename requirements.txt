@@ -4,22 +4,26 @@ uvicorn>=0.15.0
 jinja2>=3.0.1
 python-multipart>=0.0.5
 
-# NLP Libraries
+# Deep Learning
+torch>=2.1.0
+torchvision>=0.16.0
+torchaudio>=2.1.0
+transformers>=4.35.0
+
+# Text Processing
 nltk>=3.6.3
-nlpaug>=1.1.11
 beautifulsoup4>=4.11.1
+nlpaug>=1.1.11
 
 # Image Processing
-opencv-python>=4.8.0
 Pillow>=10.0.0
 
 # Audio Processing
-librosa>=0.10.0
 soundfile>=0.12.1
-audioread>=3.0.0
-numba>=0.58.1
 scipy>=1.11.4
 matplotlib>=3.8.0
+audioread>=3.0.0
+numba>=0.58.1
 
 # Core Dependencies
 numpy>=1.21.0

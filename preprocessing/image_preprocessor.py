@@ -1,12 +1,13 @@
-import cv2
-import numpy as np
+import torch
+import torchvision.transforms as transforms
+import torchvision.transforms.functional as F
 from PIL import Image
 import io
+import base64
 
 class ImagePreprocessor:
     def __init__(self):
         self.operations = {
-            "apply_all": self.apply_all_preprocessing,
             "grayscale": self.to_grayscale,
             "resize": self.resize_image,
             "normalize": self.normalize,
@@ -16,76 +17,77 @@ class ImagePreprocessor:
             "remove_noise": self.remove_noise,
             "detect_edges": self.detect_edges
         }
+        
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     
     def get_available_operations(self):
-        return list(op for op in self.operations.keys() if op != "apply_all")
+        return list(self.operations.keys())
     
-    def apply_operation(self, operation: str, image: np.ndarray) -> np.ndarray:
+    def apply_operation(self, operation: str, image_bytes: bytes) -> bytes:
         if operation in self.operations:
-            return self.operations[operation](image)
-        return image
+            # Convert bytes to PIL Image
+            image = Image.open(io.BytesIO(image_bytes))
+            # Convert PIL Image to Tensor
+            image_tensor = F.to_tensor(image).to(self.device)
+            # Apply operation
+            processed_tensor = self.operations[operation](image_tensor)
+            # Convert back to PIL Image
+            processed_image = F.to_pil_image(processed_tensor.cpu())
+            # Convert to bytes
+            buffer = io.BytesIO()
+            processed_image.save(buffer, format='PNG')
+            return buffer.getvalue()
+        return image_bytes
 
-    def apply_all_preprocessing(self, image: np.ndarray) -> np.ndarray:
-        processed_image = image.copy()
-        for op_name, op_func in self.operations.items():
-            if op_name != "apply_all":
-                processed_image = op_func(processed_image)
-        return processed_image
+    def to_grayscale(self, image: torch.Tensor) -> torch.Tensor:
+        return F.rgb_to_grayscale(image, num_output_channels=3)
+    
+    def resize_image(self, image: torch.Tensor) -> torch.Tensor:
+        return F.resize(image, [224, 224], antialias=True)
+    
+    def normalize(self, image: torch.Tensor) -> torch.Tensor:
+        return F.normalize(image, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    
+    def apply_blur(self, image: torch.Tensor) -> torch.Tensor:
+        return transforms.GaussianBlur(kernel_size=5, sigma=2.0)(image)
+    
+    def sharpen(self, image: torch.Tensor) -> torch.Tensor:
+        sharpness_factor = 2.0
+        return F.adjust_sharpness(image, sharpness_factor)
 
-    def to_grayscale(self, image: np.ndarray) -> np.ndarray:
-        return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    def equalize_histogram(self, image: torch.Tensor) -> torch.Tensor:
+        # Convert to PIL for equalization
+        image_pil = F.to_pil_image(image)
+        equalized = transforms.functional.equalize(image_pil)
+        return F.to_tensor(equalized)
     
-    def resize_image(self, image: np.ndarray) -> np.ndarray:
-        return cv2.resize(image, (224, 224))
+    def remove_noise(self, image: torch.Tensor) -> torch.Tensor:
+        # Using bilateral filter for noise reduction
+        denoise = transforms.GaussianBlur(kernel_size=5, sigma=1.0)
+        return denoise(image)
     
-    def normalize(self, image: np.ndarray) -> np.ndarray:
-        return cv2.normalize(image, None, 0, 255, cv2.NORM_MINMAX)
-    
-    def apply_blur(self, image: np.ndarray) -> np.ndarray:
-        return cv2.GaussianBlur(image, (5, 5), 0)
-    
-    def sharpen(self, image: np.ndarray) -> np.ndarray:
-        kernel = np.array([[-1,-1,-1], [-1,9,-1], [-1,-1,-1]])
-        return cv2.filter2D(image, -1, kernel)
-
-    def equalize_histogram(self, image: np.ndarray) -> np.ndarray:
-        if len(image.shape) == 3:
-            ycrcb = cv2.cvtColor(image, cv2.COLOR_BGR2YCrCb)
-            ycrcb[:,:,0] = cv2.equalizeHist(ycrcb[:,:,0])
-            return cv2.cvtColor(ycrcb, cv2.COLOR_YCrCb2BGR)
-        return cv2.equalizeHist(image)
-    
-    def remove_noise(self, image: np.ndarray) -> np.ndarray:
-        try:
-            # Check if image is colored or grayscale
-            if len(image.shape) == 3:
-                # For colored images
-                return cv2.fastNlMeansDenoisingColored(
-                    image,
-                    None,
-                    h=10,  # Filter strength (5-12 is a good range)
-                    hColor=10,  # Same as h for colored image
-                    templateWindowSize=7,  # Should be odd (3,5,7 are good values)
-                    searchWindowSize=21  # Should be odd (21 is a good value)
-                )
-            else:
-                # For grayscale images
-                return cv2.fastNlMeansDenoising(
-                    image,
-                    None,
-                    h=10,
-                    templateWindowSize=7,
-                    searchWindowSize=21
-                )
-        except Exception as e:
-            print(f"Error in noise removal: {str(e)}")
-            # If denoising fails, return original image
-            return image
-    
-    def detect_edges(self, image: np.ndarray) -> np.ndarray:
-        return cv2.Canny(image, 100, 200)
-
-    @staticmethod
-    def array_to_bytes(image: np.ndarray) -> bytes:
-        success, encoded_image = cv2.imencode('.png', image)
-        return encoded_image.tobytes()
+    def detect_edges(self, image: torch.Tensor) -> torch.Tensor:
+        # Convert to grayscale first
+        gray = F.rgb_to_grayscale(image, num_output_channels=1)
+        # Apply Sobel filters
+        sobel_x = torch.tensor([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]], device=self.device).float()
+        sobel_y = torch.tensor([[-1, -2, -1], [0, 0, 0], [1, 2, 1]], device=self.device).float()
+        
+        # Add batch and channel dimensions
+        sobel_x = sobel_x.unsqueeze(0).unsqueeze(0)
+        sobel_y = sobel_y.unsqueeze(0).unsqueeze(0)
+        
+        # Apply convolution
+        gray = gray.unsqueeze(0)  # Add batch dimension
+        edges_x = torch.nn.functional.conv2d(gray, sobel_x, padding=1)
+        edges_y = torch.nn.functional.conv2d(gray, sobel_y, padding=1)
+        
+        # Combine edges
+        edges = torch.sqrt(edges_x.pow(2) + edges_y.pow(2))
+        edges = edges.squeeze(0)  # Remove batch dimension
+        
+        # Normalize to [0, 1]
+        edges = edges / edges.max()
+        
+        # Convert to 3 channels
+        return edges.repeat(3, 1, 1)
