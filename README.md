@@ -48,8 +48,6 @@ A web-based application for processing and augmenting different types of data fi
   - Audio reversal
   - Volume adjustment
 
-
-
 ## Installation
 
 1. Clone the repository: 
@@ -81,12 +79,12 @@ http://localhost:8000
 
 
 3. Use the interface to:
-   - Select and upload your file (text, image, or audio)
-   - Choose preprocessing or augmentation options
+   - Select the type of file you want to process (text, image, or audio)
+   - Upload your file
+   - Choose preprocessing or augmentation options from the dropdown menus
    - View the results in real-time
 
 ## Supported File Formats
-
 - **Text Files:** .txt
 - **Image Files:** .png, .jpg, .jpeg
 - **Audio Files:** .mp3, .wav
@@ -109,28 +107,25 @@ data-processing-studio/
 ├── image_augmentor.py # Image augmentation operations
 └── audio_augmentor.py # Audio augmentation operations
 
-
-
 ## Dependencies
-
-Major dependencies include:
-- FastAPI & Uvicorn for web server
-- NLTK for text processing
-- OpenCV & Pillow for image processing
-- Librosa & SoundFile for audio processing
-- PyTorch & NumPy for computations
-- See requirements.txt for complete list
+- **FastAPI**: Web framework for building APIs
+- **Uvicorn**: ASGI server implementation
+- **NLTK**: Natural Language Toolkit for text processing
+- **OpenCV**: Computer vision library for image processing
+- **Librosa**: Music and audio analysis
+- **Matplotlib**: Plotting library for audio visualizations
+- **NumPy**: Numerical computing library
+- **NLPAug**: Text augmentation library
 
 ## Development
-
-The application is built with:
-- FastAPI for backend API
-- Jinja2 templates for frontend
-- Modern CSS for styling
-- Vanilla JavaScript for interactivity
+The application uses:
+- FastAPI for the backend API
+- Jinja2 templates for server-side rendering
+- Modern CSS for responsive styling
+- Vanilla JavaScript for client-side interactions
+- Real-time processing and visualization of results
 
 ## License
-
 This project is licensed under the MIT License.
 
 This README provides:
