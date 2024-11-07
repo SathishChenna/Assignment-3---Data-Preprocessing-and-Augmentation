@@ -235,16 +235,16 @@
         let currentFile = null;
 
         // Add event listeners for file inputs
-        document.getElementById('textFileInput').addEventListener('change', async function(e) {
-            await handleFileInput(e, 'text');
+        document.getElementById('textFileInput').addEventListener('change', function(e) {
+            handleFileInput(e, 'text');
         });
 
-        document.getElementById('imageFileInput').addEventListener('change', async function(e) {
-            await handleFileInput(e, 'image');
+        document.getElementById('imageFileInput').addEventListener('change', function(e) {
+            handleFileInput(e, 'image');
         });
 
-        document.getElementById('audioFileInput').addEventListener('change', async function(e) {
-            await handleFileInput(e, 'audio');
+        document.getElementById('audioFileInput').addEventListener('change', function(e) {
+            handleFileInput(e, 'audio');
         });
 
         async function handleFileInput(e, type) {
@@ -253,6 +253,8 @@
                 hideOriginalContent();
                 return;
             }
+            
+            e.target.previousElementSibling.innerHTML = `${type.charAt(0).toUpperCase() + type.slice(1)} File <span>${file.name}</span>`;
             
             clearResults();
             clearSelections();
@@ -572,6 +574,24 @@
                 // Hide all cards
                 document.querySelectorAll('.file-card').forEach(card => {
                     card.style.display = 'none';
+                    
+                    // Reset file inputs and their labels
+                    const input = card.querySelector('input[type="file"]');
+                    const label = card.querySelector('.file-input-label');
+                    
+                    // Clear the file input
+                    if (input) {
+                        input.value = '';
+                    }
+                    
+                    // Reset the label text with file extensions
+                    if (label) {
+                        const type = card.id.replace('Card', '');
+                        const extensions = type === 'text' ? '(.txt)' :
+                                         type === 'image' ? '(.png, .jpg, .jpeg)' :
+                                         '(.mp3, .wav)';
+                        label.innerHTML = `${type.charAt(0).toUpperCase() + type.slice(1)} File <span class="file-format">${extensions}</span>`;
+                    }
                 });
                 
                 // Show only the selected card
@@ -580,6 +600,7 @@
                 
                 // Update the current file type
                 currentFileType = selectedType;
+                currentFile = null;  // Reset current file
                 
                 // Clear any existing results
                 clearResults();
@@ -589,6 +610,14 @@
                 updateUIForFileType(selectedType);
             });
         });
+
+        // Add this function to reset file inputs
+        function resetFileInputs() {
+            document.querySelectorAll('.file-input').forEach(input => {
+                input.value = '';
+                updateFileLabel(input);
+            });
+        }
     </script>
 </body>
 </html> 

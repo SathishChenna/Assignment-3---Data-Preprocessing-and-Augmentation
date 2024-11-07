@@ -1,6 +1,6 @@
 :root {
-    --primary-color: #3b82f6;
-    --primary-hover: #2563eb;
+    --primary-color: #4f46e5;
+    --primary-hover: #4338ca;
     --background-color: #f8fafc;
     --card-background: #ffffff;
     --text-color: #1e293b;
@@ -8,12 +8,15 @@
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
     --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
     --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --success-color: #22c55e;
+    --error-color: #ef4444;
 }
 
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    transition: all 0.2s ease;
 }
 
 body {
@@ -26,11 +29,12 @@ body {
 /* Navbar styles */
 .navbar {
     background-color: var(--card-background);
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--shadow);
     position: fixed;
     width: 100%;
     top: 0;
     z-index: 1000;
+    border-bottom: 2px solid var(--primary-color);
 }
 
 .nav-content {
@@ -43,101 +47,272 @@ body {
 }
 
 .logo {
-    font-size: 1.25rem;
-    font-weight: 600;
+    font-size: 1.5rem;
+    font-weight: 700;
     color: var(--primary-color);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
-/* Main container */
-.container {
-    max-width: 1200px;
-    margin: 5rem auto 0;
-    padding: 0 2rem;
+/* File input section */
+.file-input-section {
+    margin-top: 80px;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background: var(--card-background);
+    border-radius: 1rem;
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+}
+
+.format-selection {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 0;
+}
+
+.format-selection label {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.5rem 1rem;
+    background: var(--background-color);
+    border: 2px solid var(--border-color);
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.format-selection label:hover {
+    border-color: var(--primary-color);
+}
+
+.format-selection input[type="radio"]:checked + span {
+    color: var(--primary-color);
+    font-weight: 600;
 }
 
 /* File cards */
 .file-type-cards {
     display: flex;
-    justify-content: center;
-    gap: 2rem;
-    margin: 1rem 0;
+    align-items: center;
+    gap: 1rem;
+    margin: 0;
 }
 
 .file-card {
-    background: var(--primary-color);
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
     padding: 0.75rem 1.5rem;
-    border-radius: 0.25rem;
+    border-radius: 0.5rem;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow);
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 0.5rem;
 }
 
 .file-card:hover {
-    background: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
 }
 
 .file-icon {
-    width: 32px;
-    height: 32px;
+    width: 1.5rem;
+    height: 1.5rem;
     color: white;
+    margin: 0;
 }
 
 .file-input-label {
     color: white;
-    font-size: 1rem;
+    font-size: 0.9rem;
     font-weight: 600;
-    text-align: left;
+    white-space: nowrap;
+    transition: all 0.2s ease;
 }
 
-.file-format {
-    font-size: 0.75rem;
-    margin-left: 0.5rem;
-    color: #1a1a1a;
-    font-weight: 600;
-    opacity: 0.8;
+/* Add style for the filename */
+.file-input-label span {
+    color: #ef4444;  /* Red color */
+    margin-left: 4px;
+    font-weight: 500;
+}
+
+/* Hide file input */
+.file-input {
+    display: none;
 }
 
 /* Results section */
 .results-section {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
-    margin-top: 2rem;
-    height: calc(100vh - 300px);
-    min-height: 500px;
+    gap: 2rem;
+    margin: 2rem auto;
+    max-width: 1400px;
+    padding: 0 2rem;
 }
 
 .result-column {
-    display: flex;
-    flex-direction: column;
     background: var(--card-background);
-    border-radius: 1rem;
+    border-radius: 0.5rem;
     overflow: hidden;
     box-shadow: var(--shadow);
-    height: 100%;
+    height: calc(100vh - 200px);
+    display: flex;
+    flex-direction: column;
 }
 
 .column-header {
-    background: var(--primary-color);
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
     color: white;
-    padding: 1rem;
+    padding: 0.75rem;
+    flex-shrink: 0;
     text-align: center;
 }
 
 .column-header h2 {
     font-size: 1.25rem;
     font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
     margin: 0;
 }
 
+/* Select styling */
+.select-container {
+    margin: 1.5rem;
+}
+
+.select-container select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: 0.5rem;
+    background-color: var(--background-color);
+    font-size: 0.95rem;
+    color: var(--text-color);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.select-container select:hover {
+    border-color: var(--primary-color);
+}
+
+.select-container select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+/* Results styling */
 .content-card {
-    padding: 1.5rem;
-    height: calc(90vh - 200px);
+    padding: 0.5rem;
+    height: calc(100vh - 300px);
     overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: var(--primary-color) var(--background-color);
+    overflow-x: hidden;
+}
+
+.result-item {
+    background: none;
+    border-radius: 0;
+    padding: 0;
+    margin-bottom: 0.5rem;
+    box-shadow: none;
+}
+
+.result-item:hover {
+    transform: none;
+}
+
+/* Ensure pre tags also wrap text */
+.result-item pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+}
+
+/* Ensure images don't overflow */
+.result-item img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Footer */
+.footer {
+    background: var(--card-background);
+    padding: 2rem;
+    text-align: center;
+    color: var(--text-color);
+    border-top: 2px solid var(--primary-color);
+}
+
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    font-weight: 500;
+}
+
+/* Responsive design */
+@media (max-width: 1024px) {
+    .results-section {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .results-section {
+        grid-template-columns: 1fr;
+    }
+    
+    .file-type-cards {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .format-selection {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+
+/* Loading states */
+.loading {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+/* Success/Error states */
+.success {
+    border-color: var(--success-color) !important;
+}
+
+.error {
+    border-color: var(--error-color) !important;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.result-item {
+    animation: fadeIn 0.3s ease-out;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 80px auto 0;
+    padding: 0 2rem;
 }
 
 /* Webkit scrollbar styling */
@@ -155,339 +330,186 @@ body {
     border-radius: 4px;
 }
 
-/* Visualization card */
-.visualization-card {
-    background: var(--background-color);
-    border-radius: 0.5rem;
-    padding: 1rem;
-    margin-top: 1rem;
-    overflow: hidden;
+/* Ensure result columns have proper height */
+.result-column {
+    height: calc(100vh - 200px);
+    display: flex;
+    flex-direction: column;
 }
 
-.waveform h4 {
-    font-size: 0.875rem;
-    color: var(--text-color);
-    margin-bottom: 0.5rem;
-    text-align: center;
+/* Ensure content area takes remaining space */
+.column-header {
+    flex-shrink: 0;
+}
+
+.content-card {
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+/* Add these styles for Original Content wrapping */
+
+.original-text pre {
+    white-space: pre-wrap;       /* Preserve whitespace and wrapping */
+    word-wrap: break-word;       /* Break words to prevent overflow */
+    overflow-wrap: break-word;   /* Modern browsers */
+    max-width: 100%;             /* Ensure content doesn't overflow */
+}
+
+.content-card .original-text {
+    word-wrap: break-word;       /* Enable word wrapping */
+    overflow-wrap: break-word;   /* Modern browsers */
+    white-space: pre-wrap;       /* Preserve whitespace and wrapping */
+    max-width: 100%;             /* Ensure content doesn't overflow */
+}
+
+/* Ensure all content cards handle text wrapping consistently */
+.content-card {
+    padding: 1.5rem;
+    height: calc(100vh - 300px);
+    overflow-y: auto;
+    overflow-x: hidden;          /* Hide horizontal scrollbar */
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-color) var(--background-color);
+    word-wrap: break-word;       /* Enable word wrapping */
+    overflow-wrap: break-word;   /* Modern browsers */
+}
+
+/* Update image-specific styles */
+.original-image img,
+.processed-image img,
+.augmented-image img {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    margin: 0;
+    padding: 0;
+}
+
+/* Hide technique names for image results */
+.image-result h4 {
+    display: none;  /* Hide the technique name headers */
+}
+
+/* Adjust result item padding for images */
+.result-item {
+    background: var(--background-color);
+    border-radius: 0.75rem;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    transition: transform 0.2s;
+    box-shadow: var(--shadow-sm);
+}
+
+/* Image specific result item */
+.image-result {
+    padding: 0;
+    margin: 0;
+    background: none;
+}
+
+.image-result h4 {
+    margin: 0.5rem 0;   /* Add small margin only to the title */
+    padding: 0 0.5rem;  /* Add small padding to the title */
+}
+
+/* Add these styles for audio output wrapping */
+
+/* Audio visualization and controls */
+.visualization-card {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.waveform {
+    width: 100%;
+    margin: 0;
+    padding: 0;
 }
 
 .waveform img {
-    max-width: 100%;
+    width: 100%;
     height: auto;
     object-fit: contain;
+    margin: 0;
+    padding: 0;
 }
 
-/* Footer */
-.footer {
-    background: var(--card-background);
-    padding: 2rem;
-    margin-top: 4rem;
-    text-align: center;
-    color: #64748b;
-}
-
-/* Responsive design */
-@media (max-width: 1024px) {
-    .results-section {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-@media (max-width: 768px) {
-    .results-section {
-        grid-template-columns: 1fr;
-    }
-    
-    .nav-content {
-        padding: 1rem;
-    }
-    
-    .container {
-        padding: 0 1rem;
-    }
-
-    .content-card {
-        height: calc(70vh - 100px);
-    }
-
-    .results-section {
-        height: auto;
-        min-height: auto;
-    }
-
-    .result-column {
-        height: auto;
-        min-height: 400px;
-    }
-
-    .file-type-cards {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .file-card {
-        width: 100%;
-        max-width: 300px;
-        justify-content: center;
-    }
-}
-
-/* Keep all the existing styles below this point */
-/* ... rest of your original styles ... */
-
-/* Add these styles to your existing CSS */
-
-/* Select styling */
-.select-container select {
-    width: 100%;
-    padding: 0.75rem;
-    border: 2px solid var(--border-color);
-    border-radius: 0.5rem;
-    background-color: var(--background-color);
-    font-size: 0.875rem;
-    color: var(--text-color);
-    cursor: pointer;
-    margin-bottom: 1rem;
-}
-
-.select-container select:hover {
-    border-color: var(--primary-color);
-}
-
-/* Results styling */
-.result-item {
-    background: var(--background-color);
-    border-radius: 0.5rem;
-    padding: 1rem;
-    margin-bottom: 1rem;
-    transition: transform 0.2s;
-    overflow: hidden;
-}
-
-.result-item pre {
-    white-space: pre-wrap;
-    word-wrap: break-word;
-    overflow-x: auto;
-    max-width: 100%;
-    font-size: 0.875rem;
-    line-height: 1.5;
-    padding: 0.5rem;
-}
-
-.result-item img {
-    max-width: 100%;
-    height: auto;
-    border-radius: 0.25rem;
-}
-
-.result-item audio {
+/* Audio controls */
+audio {
     width: 100%;
     margin: 0.5rem 0;
 }
 
-/* Audio visualization */
-.visualization-card {
-    background: var(--background-color);
-    border-radius: 0.5rem;
-    padding: 1rem;
-    margin-top: 1rem;
-}
-
-.waveform h4 {
-    font-size: 0.875rem;
-    color: var(--text-color);
-    margin-bottom: 0.5rem;
-    text-align: center;
-}
-
-.waveform img {
+/* Audio result items */
+.result-item audio,
+.result-item .visualization-card {
     width: 100%;
-    height: auto;
-    border-radius: 0.25rem;
+    margin: 0.5rem 0;
 }
 
-/* Empty state styling */
-.empty-state {
-    text-align: center;
-    padding: 2rem;
-    color: #64748b;
-    font-size: 0.875rem;
+/* Original audio content */
+.original-audio audio,
+.original-audio .visualization-card {
+    width: 100%;
+    margin: 0.5rem 0;
 }
 
-/* Processing state */
-.processing {
-    opacity: 0.7;
-    pointer-events: none;
+/* Ensure proper spacing in audio results */
+.processed-audio,
+.augmented-audio {
+    width: 100%;
+    margin: 0;
+    padding: 0;
 }
 
-/* Content card padding */
-.content-card {
-    padding: 1.5rem;
-    height: 100%;
-    overflow-y: auto;
-    max-height: 500px;
-}
-
-/* Add these styles for image results */
-.image-result {
-    text-align: center;
-}
-
-.image-result h4 {
-    margin-bottom: 1rem;
-    color: var(--text-color);
-    font-size: 0.875rem;
-    font-weight: 600;
-}
-
-.image-result img {
-    max-width: 100%;
-    height: auto;
-    object-fit: contain;
-    border-radius: 0.5rem;
-    box-shadow: var(--shadow-sm);
-}
-
-.result-item {
-    background: var(--background-color);
-    border-radius: 0.5rem;
-    padding: 1rem;
-    margin-bottom: 1rem;
-    transition: transform 0.2s;
-}
-
-.result-item:hover {
-    transform: translateY(-2px);
-}
-
-/* Update text and image specific styles */
-
-/* Text specific styles */
-.original-text pre,
-.result-item pre {
-    white-space: pre-wrap;       /* Wrap text */
-    word-wrap: break-word;       /* Break words that are too long */
-    word-break: break-word;      /* Break words at appropriate points */
-    overflow-wrap: break-word;   /* Ensure words wrap */
-    font-size: 0.875rem;
-    line-height: 1.5;
+/* Remove extra padding from audio result items */
+.content-card .result-item:has(audio) {
     padding: 0.5rem;
-    max-width: 100%;            /* Ensure text stays within container */
+    margin-bottom: 0.5rem;
 }
 
-/* Image specific styles */
-.original-image,
-.image-result {
-    max-height: calc(90vh - 250px); /* Adjust height for scrolling */
-    overflow-y: auto;              /* Enable vertical scrolling */
-    scrollbar-width: thin;         /* Firefox scrollbar */
-    scrollbar-color: var(--primary-color) var(--background-color);
-}
-
-.original-image img,
-.image-result img {
-    width: 100%;                  /* Take full width */
-    height: auto;                 /* Maintain aspect ratio */
-    object-fit: contain;          /* Ensure image fits properly */
-    border-radius: 0.5rem;
-    box-shadow: var(--shadow-sm);
-}
-
-/* Webkit scrollbar for image containers */
-.original-image::-webkit-scrollbar,
-.image-result::-webkit-scrollbar {
-    width: 8px;
-}
-
-.original-image::-webkit-scrollbar-track,
-.image-result::-webkit-scrollbar-track {
-    background: var(--background-color);
-    border-radius: 4px;
-}
-
-.original-image::-webkit-scrollbar-thumb,
-.image-result::-webkit-scrollbar-thumb {
-    background-color: var(--primary-color);
-    border-radius: 4px;
-}
-
-/* Update content card to remove default scrolling */
-.content-card {
-    padding: 1.5rem;
-    height: 100%;
-}
-
-.format-selection {
-    margin: 20px 0;
-    padding: 15px;
-    background-color: #f5f5f5;
-    border-radius: 5px;
-}
-
-.format-selection label {
-    margin-right: 20px;
-    cursor: pointer;
-}
-
-.format-selection input[type="radio"] {
-    margin-right: 5px;
-}
-
-/* Update the file input section styling */
-.file-input-section {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 2rem;
-    margin: 1rem 0;
-}
-
-.format-selection {
-    display: flex;
-    gap: 0.5rem;
-    margin: 0;
-    padding: 0;
-}
-
-.format-selection label {
-    display: flex;
-    align-items: center;
-    padding: 0.25rem 0.75rem;
-    border: 1px solid var(--border-color);
-    border-radius: 0.4rem;
-    cursor: pointer;
-    font-size: 0.85rem;
-}
-
-/* Update file card styling */
-.file-type-cards {
-    margin: 0;
-    padding: 0;
-}
-
-.file-card {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.25rem 0.75rem;
-    border: 1px solid var(--border-color);
-    border-radius: 0.4rem;
-}
-
-.file-icon {
-    width: 20px;
-    height: 20px;
-}
+/* Add these styles for better file input visibility */
 
 .file-input-label {
-    font-size: 0.85rem;
-    margin: 0;
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 600;
+    white-space: nowrap;
 }
 
-.file-format {
-    font-size: 0.75rem;
-    margin-left: 0.5rem;
-    color: #1a1a1a;
-    font-weight: 600;
-    opacity: 0.8;
+.file-card:hover .file-input-label {
+    color: white;
+}
+
+/* Add these styles for file input visibility */
+
+/* Hide the default file input */
+.file-input {
+    display: none;
+}
+
+
+/* Style for when a file is selected */
+.file-input-label.active::after {
+    content: attr(data-file-name);  /* Show filename */
+    color: #ef4444;  /* Red color */
+    font-weight: 500;
+    margin-left: 4px;
+}
+
+/* Add these styles for file input feedback */
+.file-input {
+    display: none;
+}
+
+
+
+/* Style for all file input labels after file selection */
+.file-input-label.has-file::after {
+    content: attr(data-filename);  /* Show the filename */
+    color: #ef4444;  /* Red color */
+    font-weight: 500;
+    margin-left: 4px;
 }

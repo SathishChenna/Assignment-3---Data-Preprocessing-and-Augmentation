@@ -1,5 +1,5 @@
 import re
-from nltk.tokenize import word_tokenize
+from bs4 import BeautifulSoup
 from nltk.corpus import stopwords
 import nltk
 
@@ -21,7 +21,10 @@ class TextPreprocessor:
             "remove_punctuation": self.remove_punctuation,
             "remove_numbers": self.remove_numbers,
             "remove_whitespace": self.remove_extra_whitespace,
-            "remove_stopwords": self.remove_stopwords
+            "remove_stopwords": self.remove_stopwords,
+            "remove_urls": self.remove_urls,
+            "remove_emails": self.remove_emails,
+            "remove_html_tags": self.remove_html_tags
         }
         
         # Ensure stopwords are loaded
@@ -60,8 +63,19 @@ class TextPreprocessor:
     
     def remove_stopwords(self, text: str) -> str:
         try:
-            words = word_tokenize(text)
+            words = text.split()
             return ' '.join([word for word in words if word.lower() not in self.stop_words])
         except Exception as e:
             print(f"Warning: Error in remove_stopwords: {str(e)}")
             return text
+    
+    def remove_urls(self, text: str) -> str:
+        url_pattern = r'https?://\S+|www\.\S+'
+        return re.sub(url_pattern, '', text)
+    
+    def remove_emails(self, text: str) -> str:
+        email_pattern = r'\S+@\S+\.\S+'
+        return re.sub(email_pattern, '', text)
+    
+    def remove_html_tags(self, text: str) -> str:
+        return BeautifulSoup(text, "html.parser").get_text()

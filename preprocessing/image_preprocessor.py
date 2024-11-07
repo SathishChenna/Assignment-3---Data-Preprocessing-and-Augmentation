@@ -11,7 +11,10 @@ class ImagePreprocessor:
             "resize": self.resize_image,
             "normalize": self.normalize,
             "blur": self.apply_blur,
-            "sharpen": self.sharpen
+            "sharpen": self.sharpen,
+            "equalize_histogram": self.equalize_histogram,
+            "remove_noise": self.remove_noise,
+            "detect_edges": self.detect_edges
         }
     
     def get_available_operations(self):
@@ -44,6 +47,43 @@ class ImagePreprocessor:
     def sharpen(self, image: np.ndarray) -> np.ndarray:
         kernel = np.array([[-1,-1,-1], [-1,9,-1], [-1,-1,-1]])
         return cv2.filter2D(image, -1, kernel)
+
+    def equalize_histogram(self, image: np.ndarray) -> np.ndarray:
+        if len(image.shape) == 3:
+            ycrcb = cv2.cvtColor(image, cv2.COLOR_BGR2YCrCb)
+            ycrcb[:,:,0] = cv2.equalizeHist(ycrcb[:,:,0])
+            return cv2.cvtColor(ycrcb, cv2.COLOR_YCrCb2BGR)
+        return cv2.equalizeHist(image)
+    
+    def remove_noise(self, image: np.ndarray) -> np.ndarray:
+        try:
+            # Check if image is colored or grayscale
+            if len(image.shape) == 3:
+                # For colored images
+                return cv2.fastNlMeansDenoisingColored(
+                    image,
+                    None,
+                    h=10,  # Filter strength (5-12 is a good range)
+                    hColor=10,  # Same as h for colored image
+                    templateWindowSize=7,  # Should be odd (3,5,7 are good values)
+                    searchWindowSize=21  # Should be odd (21 is a good value)
+                )
+            else:
+                # For grayscale images
+                return cv2.fastNlMeansDenoising(
+                    image,
+                    None,
+                    h=10,
+                    templateWindowSize=7,
+                    searchWindowSize=21
+                )
+        except Exception as e:
+            print(f"Error in noise removal: {str(e)}")
+            # If denoising fails, return original image
+            return image
+    
+    def detect_edges(self, image: np.ndarray) -> np.ndarray:
+        return cv2.Canny(image, 100, 200)
 
     @staticmethod
     def array_to_bytes(image: np.ndarray) -> bytes:

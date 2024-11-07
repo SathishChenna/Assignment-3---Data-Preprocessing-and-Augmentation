@@ -37,16 +37,24 @@ audio_augmentor = AudioAugmentor()
 
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
+    # Get all available operations from processors
+    text_preprocess_ops = preprocessor.get_available_operations()
+    text_augment_ops = augmentor.get_available_operations()
+    image_preprocess_ops = image_preprocessor.get_available_operations()
+    image_augment_ops = image_augmentor.get_available_operations()
+    audio_preprocess_ops = audio_preprocessor.get_available_operations()
+    audio_augment_ops = audio_augmentor.get_available_operations()
+
     return templates.TemplateResponse(
         "index.html",
         {
             "request": request,
-            "preprocess_options": preprocessor.get_available_operations(),
-            "augmentation_options": augmentor.get_available_operations(),
-            "image_preprocess_options": image_preprocessor.get_available_operations(),
-            "image_augmentation_options": image_augmentor.get_available_operations(),
-            "audio_preprocess_options": audio_preprocessor.get_available_operations(),
-            "audio_augmentation_options": audio_augmentor.get_available_operations()
+            "preprocess_options": text_preprocess_ops,
+            "augmentation_options": text_augment_ops,
+            "image_preprocess_options": image_preprocess_ops,
+            "image_augmentation_options": image_augment_ops,
+            "audio_preprocess_options": audio_preprocess_ops,
+            "audio_augmentation_options": audio_augment_ops
         }
     )
 
@@ -202,4 +210,4 @@ async def process_audio(
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000) 
+    uvicorn.run(app, host="localhost", port=8000) 
